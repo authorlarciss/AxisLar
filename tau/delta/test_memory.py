@@ -11,6 +11,7 @@ from nu.psi.contracts.alpha import (
     Entity,
     EntityId,
     ErrorCode,
+    MeasurableValue,
     Query,
     StorageSchema,
 )
@@ -54,3 +55,10 @@ async def test_schema_is_not_shared_between_engines() -> None:
     await first.add_axis(AxisDefinition(name="year", kind=AxisKind.MEASURABLE))
     assert (await first.get_schema()).axis("year") is not None
     assert (await second.get_schema()).axis("year") is None
+
+
+def test_private_comparison_helpers() -> None:
+    from nu.delta._internal.memory import _equal
+
+    assert _equal(MeasurableValue(value=2024.0), 2024.0, AxisKind.MEASURABLE) is True
+    assert _equal(MeasurableValue(value=2024.0), 2024.0, AxisKind.CATEGORICAL) is False

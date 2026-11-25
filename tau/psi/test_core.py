@@ -15,6 +15,7 @@ from nu.psi.contracts.alpha import (
     Filter,
     Operator,
     Query,
+    ScalarDefinition,
     StorageSchema,
 )
 from nu.psi.contracts.delta import DeltaResolver
@@ -74,3 +75,16 @@ async def test_core_capabilities_come_from_storage() -> None:
 @pytest.mark.parametrize("method", ["upsert", "get", "query", "count", "schema"])
 def test_core_exposes_use_cases(method: str) -> None:
     assert hasattr(build_core(), method)
+
+
+async def test_core_write_and_read_paths() -> None:
+    core = build_core()
+    assert await core.add_scalar(ScalarDefinition(name="title", searchable=True)) == []
+    entity = Entity(id=EntityId("e-1"), kind="edit", scalars={"title": "Alpha"})
+    assert await core.upsert(entity) == []
+
+    found = await core.get(EntityId("e-1"))
+    assert found is not None and found.scalars["title"] == "Alpha"
+
+    result = await core.query(Query())
+    assert result.ids == (EntityId("e-1"),)

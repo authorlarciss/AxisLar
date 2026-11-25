@@ -36,6 +36,7 @@ from nu.psi.contracts.beta import validate_query as validate_query
 from nu.psi.contracts.beta import validate_scalar as validate_scalar
 from nu.psi.contracts.delta import IStorageEngine as IStorageEngine
 from nu.psi.contracts.delta import StorageQueryError as StorageQueryError
+from nu.psi.contracts.iota import run_storage_contract as run_storage_contract
 from nu.psi.contracts.mu import CONTRACT_VERSION as CONTRACT_VERSION
 from nu.psi.contracts.mu import __version__ as __version__
 
@@ -64,6 +65,7 @@ __all__ = [
     "StorageSchema",
     "__version__",
     "build_core",
+    "run_storage_contract",
     "validate_axis",
     "validate_entity",
     "validate_query",

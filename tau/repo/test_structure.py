@@ -14,6 +14,7 @@ STANDARD_MODULES = [
     "alpha",
     "beta",
     "delta",
+    "iota",
     "sigma",
     "mu",
 ]

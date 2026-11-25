@@ -211,7 +211,7 @@ def _compare(number: float, condition: Filter) -> bool:
         second = float(condition.values[1])
         low, high = sorted((first, second))
         return low <= number <= high
-    return False
+    return False  # pragma: no cover - защита от неверного оператора
 
 
 __all__ = ["MEMORY_CAPABILITIES", "MemoryStorage"]

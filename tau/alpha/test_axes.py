@@ -93,3 +93,29 @@ def test_schema_round_trip() -> None:
     )
     restored = StorageSchema.model_validate_json(schema.model_dump_json())
     assert restored == schema
+
+
+def test_schema_rejects_duplicate_scalars_and_clash() -> None:
+    scalar = ScalarDefinition(name="title")
+    with pytest.raises(ValidationError, match="duplicate scalar names"):
+        StorageSchema(scalars=(scalar, scalar))
+    with pytest.raises(ValidationError, match="both axis and scalar"):
+        StorageSchema(
+            axes=(AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL),),
+            scalars=(ScalarDefinition(name="theme"),),
+        )
+
+
+def test_with_axis_rejects_scalar_name() -> None:
+    schema = StorageSchema(scalars=(ScalarDefinition(name="title"),))
+    with pytest.raises(ValueError, match="already a scalar"):
+        schema.with_axis(AxisDefinition(name="title", kind=AxisKind.CATEGORICAL))
+
+
+def test_with_scalar_rejects_duplicates_and_axes() -> None:
+    schema = StorageSchema(axes=(AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL),))
+    with pytest.raises(ValueError, match="already an axis"):
+        schema.with_scalar(ScalarDefinition(name="theme"))
+    with_scalar = schema.with_scalar(ScalarDefinition(name="title"))
+    with pytest.raises(ValueError, match="already exists"):
+        with_scalar.with_scalar(ScalarDefinition(name="title"))

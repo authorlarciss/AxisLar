@@ -122,6 +122,7 @@ ignore_imports = [
     "nu.psi.contracts.** -> nu.alpha.**",
     "nu.psi.contracts.** -> nu.beta.**",
     "nu.psi.contracts.** -> nu.delta.**",
+    "nu.psi.contracts.** -> nu.iota.**",
     "nu.psi.contracts.** -> nu.sigma.**",
     "nu.psi.contracts.** -> nu.mu.**",
     # <<< contracts:generated rule2
@@ -141,6 +142,7 @@ forbidden_modules = [
     "nu.alpha._internal",
     "nu.beta._internal",
     "nu.delta._internal",
+    "nu.iota._internal",
     "nu.sigma._internal",
     "nu.mu._internal",
 ]
@@ -156,6 +158,7 @@ source_modules = [
     "nu.alpha.public",
     "nu.beta.public",
     "nu.delta.public",
+    "nu.iota.public",
     "nu.sigma.public",
     "nu.mu.public",
 ]
@@ -163,6 +166,7 @@ forbidden_modules = [
     "nu.alpha._internal",
     "nu.beta._internal",
     "nu.delta._internal",
+    "nu.iota._internal",
     "nu.sigma._internal",
     "nu.mu._internal",
 ]
@@ -185,6 +189,7 @@ forbidden_modules = [
     "nu.alpha",
     "nu.beta",
     "nu.delta",
+    "nu.iota",
     "nu.sigma",
     "nu.mu",
 ]
