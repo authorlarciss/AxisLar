@@ -10,6 +10,16 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.4] - 2025-11-25
+
+### Fixed
+
+- CI: прикрепление к GitHub Release переведено в best-effort
+  (`continue-on-error`). GitHub Releases API на репозитории отдаёт HTTP 500
+  и на ручное создание релиза, поэтому источник истины — workflow-artifacts
+  (`gh run download <run-id> -n dist`), а релиз — необязательное удобство.
+- Release notes берутся из `CHANGELOG.md`, без `--generate-notes`.
+
 ## [0.2.3] - 2025-11-25
 
 ### Fixed

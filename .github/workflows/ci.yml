@@ -75,7 +75,11 @@ jobs:
 
       # gh CLI вместо softprops/action-gh-release: экшен ретраил 500 от API
       # и падал без внятной причины. Здесь шаг идемпотентен и логирует ответ.
-      - name: Attach artifacts to release
+      # Best effort: GitHub Releases API на этом репозитории отдаёт HTTP 500
+      # даже на ручное создание релиза. Артефакты всегда доступны как
+      # workflow-artifacts (`gh run download`), поэтому шаг не валит CI.
+      - name: Attach artifacts to release (best effort)
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
