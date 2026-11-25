@@ -93,11 +93,25 @@ result = await core.query(Query())
 ## Происхождение
 
 Ответвление шаблона [BaseLar](https://github.com/authorlarciss/BaseLar)
-v0.6.0 (Hellenic Architecture). Предыдущий проект VaultLar остановлен:
+v0.7.0 (Hellenic Architecture). Предыдущий проект VaultLar остановлен:
 он смешивал модель данных с конкретным хранилищем (Markdown + SQLite +
 схема Obsidian). AxisLar начинает с модели, а хранение подключает позже.
 
+## Установка
+
+Только из артефактов релиза — в репозитории пакет называется `nu`, а в
+wheel он переименован в `axislar_core`:
+
+```bash
+pip install axislar_core-0.2.0-py3-none-any.whl
+```
+
+`pip install git+...@vX.Y.Z` не поддерживается: поставит пакет `nu` и
+столкнётся с другими проектами экосистемы. Подробности — раздел «Релиз и
+деплой» в `lambda/VERSIONING.md`.
+
 ## Статус
 
-До `0.1.0`. Срез «семантика на списках»: DTO + `MemoryStorage` +
-контрактные тесты. См. `lambda/PLAN.md`.
+`0.2.0` — ядро. Модель, проверки, порт хранилища, эталонный in-memory
+бэкенд, фасад `Core`, контрактный набор, деплой-переименование пакета.
+Продукт (AgoraLar) и плагины — отдельные проекты, см. `lambda/PLAN.md`.

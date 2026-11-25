@@ -10,6 +10,25 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-11-25
+
+### Added
+
+- CI: на тег `v*` собирается дистрибутив (`make dist`) и артефакты
+  прикрепляются к релизу; основной job гоняет `make check`.
+- `tau/repo/test_package_name.py` — страж деплой-модели: в рабочем дереве
+  пакет называется `nu`, дистрибутив — `axislar-core`.
+- README: раздел «Установка» (только артефакты релиза) и актуальный статус.
+
+### Changed
+
+- `lambda/CONTRIBUTING.md` переписан под ядро: модуль-не-слой, связи через
+  `psi.contracts`, фасад `nu/contracts.py`, деплой, тесты, ошибки.
+- `lambda/VERSIONING.md`: раздел «Релиз и деплой» — `omega` содержит
+  dev-имя пакета, установка из git не поддерживается.
+- `lambda/PLAN.md`: статус 0.2.0, CLI вынесен в продукт AgoraLar.
+- Удалён `eta/strip_template.py` и `make strip-template`: ядро не шаблон.
+
 ### Changed
 
 - **Ядро отделено от продукта (ADR-0015).** Из пакета удалены `gamma`

@@ -29,7 +29,6 @@ help:
 	@echo "  make test-contract — только маркер contract"
 	@echo "  make test-e2e      — только маркер e2e"
 	@echo "  make test-module M=beta — тесты одного модуля с его покрытием"
-	@echo "  make strip-template — снести template-обвязку при форке"
 	@echo "  make run           — собрать ядро и показать состояние"
 	@echo "  make dist          — собрать дистрибутив с переименованным пакетом"
 	@echo "  make clean         — удалить кэши и venv"
@@ -92,9 +91,6 @@ test-e2e:
 
 test-module:
 	$(PYTEST) tau/$(M) --cov=nu.$(M)
-
-strip-template:
-	$(PY) -m eta.strip_template
 
 # Переименование nu -> DIST_PACKAGE выполняется в копии дерева (.deploy),
 # чтобы рабочее имя пакета оставалось простым.
