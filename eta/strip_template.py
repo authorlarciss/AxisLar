@@ -6,13 +6,13 @@
 * ``tau/template/`` — инварианты раскладки и scaffold-тесты;
 * маркер ``template`` из ``pyproject.toml``.
 
-Остальное (``scripts/``, ``tau/tooling/``, ADR 0001–0008) остаётся: это
+Остальное (``eta/``, ``tau/eta/``, ADR 0001–0008) остаётся: это
 рабочая инфраструктура, а не обвязка шаблона.
 
 Использование::
 
-    python -m scripts.strip_template --dry-run
-    python -m scripts.strip_template
+    python -m eta.strip_template --dry-run
+    python -m eta.strip_template
 """
 
 from __future__ import annotations

@@ -18,7 +18,7 @@ help:
 	@echo "  make lint-imports  — import-linter"
 	@echo "  make contracts     — пересчитать белые списки import-linter из дерева nu/"
 	@echo "  make contracts-check — проверить, что белые списки не устарели"
-	@echo "  make typecheck     — mypy (strict, nu + tau + scripts)"
+	@echo "  make typecheck     — mypy (strict, nu + tau + eta)"
 	@echo "  make format        — ruff format + ruff check --fix"
 	@echo "  make format-check  — ruff format --check (без изменений)"
 	@echo "  make check         — format-check + lint + lint-imports + contracts-check + typecheck + test"
@@ -49,26 +49,26 @@ lock:
 	uv lock
 
 lint:
-	$(RUFF) check nu tau scripts
+	$(RUFF) check nu tau eta
 
 lint-imports:
 	$(LINT_IMPORTS)
 
 contracts:
-	$(PY) -m scripts.sync_contracts
+	$(PY) -m eta.sync_contracts
 
 contracts-check:
-	$(PY) -m scripts.sync_contracts --check
+	$(PY) -m eta.sync_contracts --check
 
 typecheck:
-	$(MYPY) nu tau scripts
+	$(MYPY) nu tau eta
 
 format:
-	$(RUFF) format nu tau scripts
-	$(RUFF) check --fix nu tau scripts
+	$(RUFF) format nu tau eta
+	$(RUFF) check --fix nu tau eta
 
 format-check:
-	$(RUFF) format --check nu tau scripts
+	$(RUFF) format --check nu tau eta
 
 check: format-check lint lint-imports contracts-check typecheck test
 
@@ -93,7 +93,7 @@ test-module:
 	$(PYTEST) tau/$(M) --cov=nu.$(M)
 
 strip-template:
-	$(PY) -m scripts.strip_template
+	$(PY) -m eta.strip_template
 
 run:
 	$(VENV)/bin/python -m nu.main

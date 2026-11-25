@@ -368,7 +368,7 @@ Zeta — модуль для экспериментов и легаси.
 `tau/template/test_layout.py`):
 
 - `tau/template/` — инварианты шаблона, сносятся через `make strip-template`;
-- `tau/tooling/` — тесты на `scripts/`;
+- `tau/eta/` — тесты на `eta/`;
 - `tau/contract/` — контрактные наборы, параметризуются по реализации;
 - `tau/e2e/` — сквозные сценарии;
 - `tau/support/` — фикстуры и билдеры, не тесты.

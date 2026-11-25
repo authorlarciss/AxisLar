@@ -21,9 +21,9 @@ repos:
   - repo: local
     hooks:
       - id: mypy
-        name: mypy (strict, nu + tau + scripts)
+        name: mypy (strict, nu + tau + eta)
         entry: .venv/bin/mypy
         language: system
         types_or: [ python, pyi ]
-        args: [ nu, tau, scripts, --config-file=pyproject.toml ]
+        args: [ nu, tau, eta, --config-file=pyproject.toml ]
         pass_filenames: false

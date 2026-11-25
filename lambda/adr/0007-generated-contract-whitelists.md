@@ -24,7 +24,7 @@ ADR-0004 включил `unmatched_ignore_imports_alerting = "error"`: кажд�
    легальная цепочка `psi -> nu.X.public.resolver -> nu.X._internal`
    нарушением не является. Белый список правилу 3 не нужен.
 
-2. **Правила 2 и 5 генерируются.** `scripts/sync_contracts.py` сканирует
+2. **Правила 2 и 5 генерируются.** `eta/sync_contracts.py` сканирует
    `nu/` (через `ast`), вычисляет ожидаемые списки и перезаписывает блоки
    между маркерами `# >>> contracts:generated ruleN` /
    `# <<< contracts:generated ruleN`. Источник истины — файловая система,
@@ -37,7 +37,7 @@ ADR-0004 включил `unmatched_ignore_imports_alerting = "error"`: кажд�
    Точная запись всегда матчится и не расширяет белый список шире
    фактических импортов.
 
-4. **Регрессия ловится тестом** `tau/tooling/test_sync_contracts.py::
+4. **Регрессия ловится тестом** `tau/eta/test_sync_contracts.py::
    test_repository_pyproject_is_in_sync` — расхождение падает в обычном
    прогоне, даже если забыть `make contracts`.
 
@@ -71,3 +71,6 @@ ADR-0004 включил `unmatched_ignore_imports_alerting = "error"`: кажд�
 ## Статус
 
 Принято.
+
+> Примечание (0.6.1): пути обновлены при переносе `scripts/` -> `eta/`
+> и `tau/tooling/` -> `tau/eta/`. Решение не менялось.

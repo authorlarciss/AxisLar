@@ -1,10 +1,10 @@
-"""Тесты сноса template-обвязки (``scripts/strip_template.py``)."""
+"""Тесты сноса template-обвязки (``eta/strip_template.py``)."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.strip_template import main, strip_marker
+from eta.strip_template import main, strip_marker
 
 PYPROJECT = """\
 [tool.pytest.ini_options]

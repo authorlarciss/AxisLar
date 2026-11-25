@@ -1,4 +1,4 @@
-"""Тесты генератора белых списков import-linter (``scripts/sync_contracts.py``)."""
+"""Тесты генератора белых списков import-linter (``eta/sync_contracts.py``)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.sync_contracts import (
+from eta.sync_contracts import (
     AXIS_MODULES,
     MarkerError,
     begin_marker,

@@ -16,8 +16,8 @@
 
 Использование::
 
-    python -m scripts.sync_contracts           # перезаписать блоки
-    python -m scripts.sync_contracts --check   # только проверить (exit 1 при расхождении)
+    python -m eta.sync_contracts           # перезаписать блоки
+    python -m eta.sync_contracts --check   # только проверить (exit 1 при расхождении)
 """
 
 from __future__ import annotations

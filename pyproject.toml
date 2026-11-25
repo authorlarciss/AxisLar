@@ -60,14 +60,14 @@ follow_imports = "skip"
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-src = ["nu", "tau", "scripts"]
+src = ["nu", "tau", "eta"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
 ignore = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["nu", "tau", "scripts"]
+known-first-party = ["nu", "tau", "eta"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -76,7 +76,7 @@ indent-style = "space"
 # ---------- Pytest ----------
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra -q --strict-markers --cov=nu --cov=scripts --cov-branch --cov-report=term-missing"
+addopts = "-ra -q --strict-markers --cov=nu --cov=eta --cov-branch --cov-report=term-missing"
 testpaths = ["tau"]
 pythonpath = ["."]
 asyncio_mode = "auto"
@@ -138,7 +138,7 @@ modules = [
     "nu.sigma",
     "nu.mu",
 ]
-# Блок генерируется: `make contracts` (scripts/sync_contracts.py, ADR-0007).
+# Блок генерируется: `make contracts` (eta/sync_contracts.py, ADR-0007).
 # Править руками бессмысленно — расхождение ловит `make contracts-check`.
 ignore_imports = [
     # >>> contracts:generated rule2
@@ -227,7 +227,7 @@ forbidden_modules = [
     "nu.sigma._internal",
     "nu.mu._internal",
 ]
-# Блок генерируется: `make contracts` (scripts/sync_contracts.py, ADR-0007).
+# Блок генерируется: `make contracts` (eta/sync_contracts.py, ADR-0007).
 ignore_imports = [
     # >>> contracts:generated rule5
     "nu.beta.public.resolver -> nu.beta._internal.workflow",

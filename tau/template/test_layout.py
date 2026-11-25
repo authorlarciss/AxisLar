@@ -17,7 +17,7 @@ TAU_ROOT = ROOT / "tau"
 
 #: Каталоги tau/ без модуля-владельца: тестируют отношения между модулями
 #: или обслуживают репозиторий.
-SHARED_DIRS: frozenset[str] = frozenset({"contract", "e2e", "support", "template", "tooling"})
+SHARED_DIRS: frozenset[str] = frozenset({"contract", "e2e", "support", "template", "eta"})
 
 #: Раскладка «по уровню» вместо «по модулю» — запрещена.
 LEVEL_DIRS: frozenset[str] = frozenset({"unit", "integration"})
