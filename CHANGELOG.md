@@ -10,6 +10,14 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.2] - 2025-11-25
+
+### Fixed
+
+- CI: job `dist` получил `permissions: contents: write` — без этого
+  прикрепление артефактов к релизу GitHub падало бы на токене с
+  read-only правами. Теперь wheel и sdist появляются в релизе тега.
+
 ## [0.2.1] - 2025-11-25
 
 ### Added
