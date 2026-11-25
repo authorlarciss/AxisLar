@@ -3,15 +3,17 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "baselar"
+name = "axislar"
 dynamic = ["version"]
-description = "BaseLar — инвариантный шаблон греческих проектов"
+description = "AxisLar — многомерное ядро хранения: объекты в пространстве осей"
 readme = "README.md"
 requires-python = ">=3.13,<3.15"
 authors = [
     { name = "authorlarciss", email = "author.larciss@gmail.com" }
 ]
-dependencies = []
+dependencies = [
+    "pydantic>=2.14.4",
+]
 
 [project.optional-dependencies]
 dev = [
