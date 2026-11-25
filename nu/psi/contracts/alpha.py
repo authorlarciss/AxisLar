@@ -5,6 +5,7 @@
 
 from nu.alpha.public import AxisDefinition as AxisDefinition
 from nu.alpha.public import AxisKind as AxisKind
+from nu.alpha.public import Capability as Capability
 from nu.alpha.public import CategoricalValue as CategoricalValue
 from nu.alpha.public import DomainError as DomainError
 from nu.alpha.public import Entity as Entity
@@ -24,6 +25,7 @@ from nu.alpha.public import StorageSchema as StorageSchema
 __all__ = [
     "AxisDefinition",
     "AxisKind",
+    "Capability",
     "CategoricalValue",
     "DomainError",
     "Entity",

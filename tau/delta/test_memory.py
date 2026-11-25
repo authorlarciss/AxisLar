@@ -7,14 +7,14 @@ import pytest
 from nu.psi.contracts.alpha import (
     AxisDefinition,
     AxisKind,
+    Capability,
     Entity,
     EntityId,
     ErrorCode,
     Query,
     StorageSchema,
 )
-from nu.psi.contracts.beta import Capability, IStorageEngine, StorageQueryError
-from nu.psi.contracts.delta import DeltaResolver
+from nu.psi.contracts.delta import DeltaResolver, IStorageEngine, StorageQueryError
 
 SCHEMA = StorageSchema(axes=(AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL),))
 

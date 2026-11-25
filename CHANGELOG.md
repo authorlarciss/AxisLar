@@ -10,6 +10,22 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Changed
+
+- **Ядро отделено от продукта (ADR-0015).** Из пакета удалены `gamma`
+  (CLI), `epsilon`, `zeta`, `iota`; `psi.application`/`context`/`interfaces`
+  и снимок состояния удалены — это продуктовые сущности.
+- Порт `IStorageEngine` и `StorageQueryError` переехали из `beta` в
+  `delta`: модуль владеет понятием целиком, порт нужен только внешним
+  бэкендам-плагинам. `IQueryResolver` и `BetaResolver` удалены;
+  валидация — чистые функции `validate_*` в `beta`.
+- `Capability` переехал в `alpha`: это словарь домена, а не деталь
+  бэкенда.
+- Новый фасад `Core` + `build_core()` — единственный вход в ядро.
+- `CONTRACT_VERSION = "2"`: публичная поверхность изменилась ломающе.
+- Дистрибутив переименован в `axislar-core`; консольный скрипт `axislar`
+  удалён (CLI будет в продукте).
+
 ## [0.1.0] - 2025-11-25
 
 Первый релиз: модель зафиксирована, семантика проверена контрактом.

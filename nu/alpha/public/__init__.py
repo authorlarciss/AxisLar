@@ -8,6 +8,7 @@
 from nu.alpha.public.axes import AxisDefinition as AxisDefinition
 from nu.alpha.public.axes import AxisKind as AxisKind
 from nu.alpha.public.axes import ScalarDefinition as ScalarDefinition
+from nu.alpha.public.capabilities import Capability as Capability
 from nu.alpha.public.entities import Entity as Entity
 from nu.alpha.public.entities import Provenance as Provenance
 from nu.alpha.public.errors import DomainError as DomainError
@@ -26,6 +27,7 @@ from nu.alpha.public.schema import StorageSchema as StorageSchema
 __all__ = [
     "AxisDefinition",
     "AxisKind",
+    "Capability",
     "CategoricalValue",
     "DomainError",
     "Entity",

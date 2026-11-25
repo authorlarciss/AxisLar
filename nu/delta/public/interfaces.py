@@ -1,18 +1,19 @@
-"""Контракты модуля beta: движок хранилища и резолвер запросов.
+"""Порт хранилища — контракт модуля `delta`.
 
-Все интерфейсы async — future-proof. Синхронная реализация просто не
-содержит `await` (ADR-0014 заменил pipeline-scaffold доменными
-контрактами).
+`delta` владеет понятием «хранилище» целиком: и портом, и эталонной
+реализацией. Модуль не является слоем и не задаёт шаблон для другого
+модуля того же проекта; порт нужен для **внешних** реализаций (плагины
+хранилищ), которые подключает продукт.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from enum import StrEnum
 
 from nu.psi.contracts.alpha import (
     AxisDefinition,
+    Capability,
     DomainError,
     Entity,
     EntityId,
@@ -23,27 +24,10 @@ from nu.psi.contracts.alpha import (
 )
 
 
-class Capability(StrEnum):
-    """Что бэкенд реально умеет.
-
-    Запрос, требующий отсутствующей возможности, обязан быть отвергнут
-    резолвером (`UnsupportedQuery`), а не исполнен полным перебором в
-    обход индексов (ADR-0013).
-    """
-
-    QUERY_CATEGORICAL = "query_categorical"
-    QUERY_MEASURABLE = "query_measurable"
-    QUERY_REFERENCE = "query_reference"
-    SCALAR_SEARCH = "scalar_search"
-    REFERENCE_CHECK = "reference_check"
-    WRITE_BULK = "write_bulk"
-    DYNAMIC_AXES = "dynamic_axes"
-
-
 class IStorageEngine(ABC):
     """Бэкенд хранения объектов в пространстве осей.
 
-    Контракт один для всех бэкендов; его поведение фиксирует
+    Контракт один для всех бэкендов; поведение фиксирует
     `tau/contract/`. Ошибки домена возвращаются значениями: пустой список
     означает успех.
     """
@@ -82,7 +66,7 @@ class IStorageEngine(ABC):
 
     @abstractmethod
     async def query(self, query: Query) -> QueryResult:
-        """Исполнить запрос. Валидацию выполняет `IQueryResolver`."""
+        """Исполнить запрос. Валидацию выполняет `validate_query` из `beta`."""
 
     @abstractmethod
     async def count(self) -> int:
@@ -93,21 +77,4 @@ class IStorageEngine(ABC):
         """Возможности бэкенда (синхронно: это статическое свойство)."""
 
 
-class IQueryResolver(ABC):
-    """Валидация запросов против схемы и возможностей бэкенда.
-
-    Отдельный контракт, а не метод движка: клиент может проверить запрос
-    до обращения к хранилищу и получить те же ошибки, что и движок.
-    """
-
-    @abstractmethod
-    async def check(
-        self,
-        query: Query,
-        schema: StorageSchema,
-        capabilities: frozenset[Capability],
-    ) -> list[DomainError]:
-        """Список ошибок; пустой — запрос исполним."""
-
-
-__all__ = ["Capability", "IQueryResolver", "IStorageEngine"]
+__all__ = ["IStorageEngine"]

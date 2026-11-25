@@ -1,16 +1,19 @@
 """In-memory бэкенд: словари и списки, никакого SQL (ADR-0013).
 
-Это эталон семантики: `tau/contract/` проверяет его так же, как любой
-будущий бэкенд.
+Эталон семантики: `tau/contract/` проверяет его так же, как любой
+внешний бэкенд-плагин.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
 
+from nu.delta.public.errors import StorageQueryError
+from nu.delta.public.interfaces import IStorageEngine
 from nu.psi.contracts.alpha import (
     AxisDefinition,
     AxisKind,
+    Capability,
     DomainError,
     Entity,
     EntityId,
@@ -24,10 +27,6 @@ from nu.psi.contracts.alpha import (
     StorageSchema,
 )
 from nu.psi.contracts.beta import (
-    Capability,
-    IQueryResolver,
-    IStorageEngine,
-    StorageQueryError,
     validate_axis,
     validate_entity,
     validate_query,
@@ -56,14 +55,9 @@ class MemoryStorage(IStorageEngine):
     зависели от порядка вставки.
     """
 
-    def __init__(
-        self,
-        schema: StorageSchema | None = None,
-        resolver: IQueryResolver | None = None,
-    ) -> None:
+    def __init__(self, schema: StorageSchema | None = None) -> None:
         self._schema = schema or StorageSchema()
         self._entities: dict[EntityId, Entity] = {}
-        self._resolver = resolver
 
     # ---------------------------------------------------------------- схема
 
@@ -76,19 +70,19 @@ class MemoryStorage(IStorageEngine):
             self._schema = self._schema.with_axis(axis)
         return errors
 
-    # --------------------------------------------------------------- запись
-
     async def add_scalar(self, scalar: ScalarDefinition) -> list[DomainError]:
         errors = validate_scalar(self._schema, scalar)
         if not errors:
             self._schema = self._schema.with_scalar(scalar)
         return errors
 
+    # --------------------------------------------------------------- запись
+
     async def upsert(self, entity: Entity) -> list[DomainError]:
         errors = validate_entity(
             self._schema,
             entity,
-            known_ids=self._known_ids_with(entity),
+            known_ids={*self._entities, entity.id},
             capabilities=self.capabilities(),
         )
         if not errors:
@@ -136,7 +130,7 @@ class MemoryStorage(IStorageEngine):
     # --------------------------------------------------------------- запрос
 
     async def query(self, query: Query) -> QueryResult:
-        errors = await self._check(query)
+        errors = validate_query(self._schema, query, self.capabilities())
         if errors:
             raise StorageQueryError(errors)
 
@@ -154,35 +148,8 @@ class MemoryStorage(IStorageEngine):
             window = window[: query.limit]
         return QueryResult(ids=tuple(window), total=total, limit=query.limit, offset=query.offset)
 
-    @property
-    def schema(self) -> StorageSchema:
-        """Схема без `await` — для снимков и отладки."""
-        return self._schema
-
-    def iter_entities(self) -> tuple[Entity, ...]:
-        """Все объекты в детерминированном порядке (для снимков)."""
-        return tuple(self._entities[entity_id] for entity_id in sorted(self._entities))
-
-    def upsert_sync(self, entity: Entity) -> list[DomainError]:
-        """Синхронная запись без ссылочной проверки — для загрузки снимка."""
-        errors = validate_entity(self._schema, entity, capabilities=frozenset())
-        if not errors:
-            self._entities[entity.id] = entity
-        return errors
-
     def capabilities(self) -> frozenset[Capability]:
         return MEMORY_CAPABILITIES
-
-    # -------------------------------------------------------------- helpers
-
-    def _known_ids_with(self, entity: Entity) -> set[EntityId]:
-        """Идентификаторы, известные на момент записи, включая сам объект."""
-        return {*self._entities, entity.id}
-
-    async def _check(self, query: Query) -> list[DomainError]:
-        if self._resolver is None:
-            return validate_query(self._schema, query, self.capabilities())
-        return await self._resolver.check(query, self._schema, self.capabilities())
 
 
 def _matches(entity: Entity, condition: Filter, schema: StorageSchema) -> bool:

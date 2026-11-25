@@ -96,7 +96,7 @@ strip-template:
 	$(PY) -m eta.strip_template
 
 run:
-	$(VENV)/bin/axislar schema show
+	$(VENV)/bin/python -m nu.main
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

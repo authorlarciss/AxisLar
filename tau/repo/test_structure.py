@@ -13,11 +13,7 @@ NU_ROOT = Path(_nu_file).parent
 STANDARD_MODULES = [
     "alpha",
     "beta",
-    "gamma",
     "delta",
-    "epsilon",
-    "zeta",
-    "iota",
     "sigma",
     "mu",
 ]

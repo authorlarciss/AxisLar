@@ -14,6 +14,7 @@ import pytest
 from nu.psi.contracts.alpha import (
     AxisDefinition,
     AxisKind,
+    Capability,
     CategoricalValue,
     DomainError,
     Entity,
@@ -28,7 +29,7 @@ from nu.psi.contracts.alpha import (
     ScalarDefinition,
     StorageSchema,
 )
-from nu.psi.contracts.beta import Capability, IStorageEngine, StorageQueryError
+from nu.psi.contracts.delta import IStorageEngine, StorageQueryError
 
 SCHEMA = StorageSchema(
     axes=(

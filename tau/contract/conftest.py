@@ -11,8 +11,7 @@ from collections.abc import Callable
 import pytest
 
 from nu.psi.contracts.alpha import StorageSchema
-from nu.psi.contracts.beta import IStorageEngine
-from nu.psi.contracts.delta import DeltaResolver
+from nu.psi.contracts.delta import DeltaResolver, IStorageEngine
 
 #: Фабрики бэкендов: имя -> (схема) -> движок.
 BACKENDS: dict[str, Callable[[StorageSchema], IStorageEngine]] = {

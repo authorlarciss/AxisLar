@@ -1,6 +1,6 @@
-"""Psi — композиционный корень и точка входа."""
+"""Psi — композиционный корень ядра."""
 
-from nu.psi.application import Application
-from nu.psi.context import Context
+from nu.psi.bootstrap import build_core as build_core
+from nu.psi.core import Core as Core
 
-__all__ = ["Application", "Context"]
+__all__ = ["Core", "build_core"]

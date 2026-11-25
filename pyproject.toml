@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "axislar"
+name = "axislar-core"
 dynamic = ["version"]
-description = "AxisLar — многомерное ядро хранения: объекты в пространстве осей"
+description = "AxisLar core — многомерное ядро: оси, фасеты, объекты (без продукта и плагинов)"
 readme = "README.md"
 requires-python = ">=3.13,<3.15"
 authors = [
@@ -25,9 +25,6 @@ dev = [
     "pytest-asyncio>=0.24",
     "import-linter>=2.0",
 ]
-
-[project.scripts]
-axislar = "nu.main:main"
 
 [tool.setuptools.dynamic]
 version = { attr = "nu.mu.public.__version__" }
@@ -92,63 +89,35 @@ markers = [
     "e2e: полный конвейер от входа до выхода",
 ]
 
-[tool.coverage.run]
-omit = ["nu/main.py"]
-
 [tool.importlinter]
 root_package = "nu"
 include_external_packages = false
 
-# ============================================================
-# Правило 1. Только psi — к psi.bootstrap/application/context.
-# main.py сюда не входит: он обязан импортировать psi.bootstrap
-# (см. правило 6 — main ограничен psi).
-# ============================================================
-[[tool.importlinter.contracts]]
-name = "Only psi may import psi.bootstrap, psi.application, psi.context"
-type = "forbidden"
-source_modules = [
-    "nu.alpha",
-    "nu.beta",
-    "nu.gamma",
-    "nu.delta",
-    "nu.epsilon",
-    "nu.zeta",
-    "nu.iota",
-    "nu.sigma",
-    "nu.mu",
-]
-forbidden_modules = [
-    "nu.psi.bootstrap",
-    "nu.psi.application",
-    "nu.psi.context",
-]
+# Ядро — пять модулей: alpha (DTO), beta (проверки), delta (хранилище),
+# sigma (логи), mu (версии). Продукт и плагины живут в отдельных проектах,
+# поэтому правила про них здесь отсутствуют.
 
 # ============================================================
-# Правило 2. Модули независимы друг от друга.
-# Все связи — через nu.psi.contracts.
+# Правило 1. Только psi собирает ядро.
+# ============================================================
+[[tool.importlinter.contracts]]
+name = "Only psi may import psi.bootstrap and psi.core"
+type = "forbidden"
+source_modules = ["nu.alpha", "nu.beta", "nu.delta", "nu.sigma", "nu.mu"]
+forbidden_modules = ["nu.psi.bootstrap", "nu.psi.core"]
+
+# ============================================================
+# Правило 2. Модули независимы друг от друга; связи — через psi.contracts.
+# Белый список генерируется: `make contracts` (eta/sync_contracts.py).
 # ============================================================
 [[tool.importlinter.contracts]]
 name = "Modules are independent"
 type = "independence"
-modules = [
-    "nu.alpha",
-    "nu.beta",
-    "nu.gamma",
-    "nu.delta",
-    "nu.epsilon",
-    "nu.zeta",
-    "nu.iota",
-    "nu.sigma",
-    "nu.mu",
-]
-# Блок генерируется: `make contracts` (eta/sync_contracts.py, ADR-0007).
-# Править руками бессмысленно — расхождение ловит `make contracts-check`.
+modules = ["nu.alpha", "nu.beta", "nu.delta", "nu.sigma", "nu.mu"]
 ignore_imports = [
     # >>> contracts:generated rule2
     "nu.psi.contracts.** -> nu.alpha.**",
     "nu.psi.contracts.** -> nu.beta.**",
-    "nu.psi.contracts.** -> nu.gamma.**",
     "nu.psi.contracts.** -> nu.delta.**",
     "nu.psi.contracts.** -> nu.sigma.**",
     "nu.psi.contracts.** -> nu.mu.**",
@@ -157,10 +126,9 @@ ignore_imports = [
 unmatched_ignore_imports_alerting = "error"
 
 # ============================================================
-# Правило 3. Psi и main не импортируют _internal модулей напрямую.
-# Исключение: через public/resolver.py — единая разрешённая
-# точка доступа (ADR-0002, resolver pattern).
-# Zeta НЕ входит в исключение — её _internal закрыт навсегда.
+# Правило 3. Psi и main не трогают _internal напрямую.
+# Только прямой импорт: цепочка через public/resolver.py легальна
+# (allow_indirect_imports), поэтому белый список не нужен (ADR-0007).
 # ============================================================
 [[tool.importlinter.contracts]]
 name = "Psi and main do not import _internal except via resolver"
@@ -169,44 +137,14 @@ source_modules = ["nu.psi", "nu.main"]
 forbidden_modules = [
     "nu.alpha._internal",
     "nu.beta._internal",
-    "nu.gamma._internal",
     "nu.delta._internal",
-    "nu.epsilon._internal",
-    "nu.zeta._internal",
-    "nu.iota._internal",
     "nu.sigma._internal",
     "nu.mu._internal",
 ]
-# Белого списка нет намеренно: allow_indirect_imports проверяет только
-# прямой импорт, поэтому легальная цепочка
-# psi -> nu.X.public.resolver -> nu.X._internal.* нарушением не является
-# (ADR-0007). Запрет на прямой psi -> nu.X._internal сохраняется.
 allow_indirect_imports = true
 
 # ============================================================
-# Правило 4. Zeta._internal не импортируется никем.
-# Ни одним модулем, ни psi, ни main, ни через resolver.
-# ============================================================
-[[tool.importlinter.contracts]]
-name = "Zeta _internal is never imported"
-type = "forbidden"
-source_modules = [
-    "nu.alpha",
-    "nu.beta",
-    "nu.gamma",
-    "nu.delta",
-    "nu.epsilon",
-    "nu.iota",
-    "nu.sigma",
-    "nu.mu",
-    "nu.psi",
-    "nu.main",
-]
-forbidden_modules = ["nu.zeta._internal"]
-
-# ============================================================
-# Правило 5. Public не импортирует _internal (кроме resolver).
-# Закрывает дыру, заявленную в ADR-0002, но не проверявшуюся.
+# Правило 4. Public не импортирует _internal (кроме resolver).
 # ============================================================
 [[tool.importlinter.contracts]]
 name = "Public does not import _internal except via resolver"
@@ -214,39 +152,27 @@ type = "forbidden"
 source_modules = [
     "nu.alpha.public",
     "nu.beta.public",
-    "nu.gamma.public",
     "nu.delta.public",
-    "nu.epsilon.public",
-    "nu.zeta.public",
-    "nu.iota.public",
     "nu.sigma.public",
     "nu.mu.public",
 ]
 forbidden_modules = [
     "nu.alpha._internal",
     "nu.beta._internal",
-    "nu.gamma._internal",
     "nu.delta._internal",
-    "nu.epsilon._internal",
-    "nu.zeta._internal",
-    "nu.iota._internal",
     "nu.sigma._internal",
     "nu.mu._internal",
 ]
-# Блок генерируется: `make contracts` (eta/sync_contracts.py, ADR-0007).
 ignore_imports = [
     # >>> contracts:generated rule5
-    "nu.beta.public.resolver -> nu.beta._internal.query_resolver",
     "nu.delta.public.resolver -> nu.delta._internal.memory",
-    "nu.delta.public.resolver -> nu.delta._internal.snapshot",
     "nu.sigma.public.resolver -> nu.sigma._internal.setup",
     # <<< contracts:generated rule5
 ]
 unmatched_ignore_imports_alerting = "error"
 
 # ============================================================
-# Правило 6. main.py импортирует только из nu.psi.
-# main — тонкий лаунчер. Всё остальное — через psi.bootstrap.
+# Правило 5. main.py импортирует только из nu.psi.
 # ============================================================
 [[tool.importlinter.contracts]]
 name = "main.py imports only from nu.psi"
@@ -255,11 +181,7 @@ source_modules = ["nu.main"]
 forbidden_modules = [
     "nu.alpha",
     "nu.beta",
-    "nu.gamma",
     "nu.delta",
-    "nu.epsilon",
-    "nu.zeta",
-    "nu.iota",
     "nu.sigma",
     "nu.mu",
 ]

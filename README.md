@@ -51,13 +51,17 @@ AxisLar — абстрактное ядро для многомерных дан
 
 ## Структура
 
-| Модуль | Роль в AxisLar |
-|--------|----------------|
-| `alpha` | DTO: `Entity`, `AxisDefinition`, `FacetValue`, `StorageSchema`, `Query`, `QueryResult` |
-| `beta` | Контракты: `IStorageEngine`, `IQueryResolver` |
-| `gamma` | Клиенты: CLI, Python API (не в ядре) |
-| `delta` | Бэкенды: `MemoryStorage` (референс), позже `JsonStorage`, `SqliteStorage` |
-| `psi` | Сборка: контракты, bootstrap, DI |
+| Модуль | Роль в ядре |
+|--------|--------------|
+| `alpha` | DTO и словарь домена: `Entity`, `AxisDefinition`, `FacetValue`, `StorageSchema`, `Query`, `QueryResult`, `Capability`, `DomainError` |
+| `beta` | Доменные правила: `validate_axis/scalar/entity/query` (чистые функции) |
+| `delta` | Хранилище: порт `IStorageEngine`, эталонный `MemoryStorage`, ошибки исполнения |
+| `sigma` | Логирование |
+| `mu` | Версии: `__version__`, `CONTRACT_VERSION` |
+| `psi` | Сборка ядра: `build_core()`, фасад `Core`, контракты модулей |
+
+Продукта и плагинов в этом проекте нет: `Core` — стабильный вход, продукт
+(интерфейс + реестр плагинов) и бэкенды-плагины — отдельные проекты.
 
 Корневые каталоги: `tau/` — тесты, `eta/` — инструменты разработки (вне
 дистрибутива), `lambda/` — документация, `omega/` — сборка и релиз
@@ -71,24 +75,20 @@ AxisLar — абстрактное ядро для многомерных дан
 ```bash
 make install   # uv sync + pre-commit hook
 make check     # формат, линт, контракты, типы, тесты
+make run       # собрать ядро и показать состояние
 ```
 
-## CLI
+Использование из кода:
 
-```bash
-axislar --state vault.json schema add-axis --name theme --kind categorical --multi
-axislar --state vault.json schema add-scalar --name title --searchable
-axislar --state vault.json put --id e1 --kind edit --facet theme=cyberpunk,noir --scalar title=Alpha
-axislar --state vault.json query --filter theme:contains=noir --json
-axislar --state vault.json show --id e1
+```python
+from nu.psi import build_core
+from nu.psi.contracts.alpha import AxisDefinition, AxisKind, Entity
+
+core = build_core()  # эталонное in-memory хранилище
+await core.add_axis(AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL))
+await core.upsert(Entity(id="e-1", kind="edit"))
+result = await core.query(Query())
 ```
-
-`--state` — снимок in-memory хранилища (JSON-файл), а не бэкенд: запросы к
-файлу не выполняются. Настоящий файловый бэкенд — отдельный этап (PLAN M6).
-
-Операторы фильтра: `contains`, `any_of`, `none_of`, `exists`, `not_exists`,
-`eq`, `gt`, `lt`, `gte`, `lte`, `between`, `scalar_eq`. `!=` нет: на
-мультизначной оси он неоднозначен (ADR-0012).
 
 ## Происхождение
 

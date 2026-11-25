@@ -14,10 +14,10 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
-from nu.beta.public.interfaces import Capability
 from nu.psi.contracts.alpha import (
     AxisDefinition,
     AxisKind,
+    Capability,
     CategoricalValue,
     DomainError,
     Entity,

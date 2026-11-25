@@ -9,6 +9,7 @@ import pytest
 from nu.psi.contracts.alpha import (
     AxisDefinition,
     AxisKind,
+    Capability,
     CategoricalValue,
     DomainError,
     Entity,
@@ -21,7 +22,7 @@ from nu.psi.contracts.alpha import (
     ScalarDefinition,
     StorageSchema,
 )
-from nu.psi.contracts.beta import Capability, validate_axis, validate_entity, validate_query
+from nu.psi.contracts.beta import validate_axis, validate_entity, validate_query
 
 SCHEMA = StorageSchema(
     axes=(

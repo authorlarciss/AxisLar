@@ -1,4 +1,4 @@
-"""Публичные контракты модулей.
+"""Публичные контракты модулей ядра.
 
 Модули импортируют контракты конкретных модулей через подмодули:
 `nu.psi.contracts.alpha`, `nu.psi.contracts.beta` и т.д.
@@ -6,7 +6,7 @@
 Агрегат `Contracts` — удобная точка доступа для инструментов и тестов.
 """
 
-from . import alpha, beta, delta, epsilon, gamma, iota, mu, sigma, zeta
+from . import alpha, beta, delta, mu, sigma
 
 
 class Contracts:
@@ -14,24 +14,9 @@ class Contracts:
 
     alpha = alpha
     beta = beta
-    gamma = gamma
     delta = delta
-    epsilon = epsilon
-    zeta = zeta
-    iota = iota
     sigma = sigma
     mu = mu
 
 
-__all__ = [
-    "Contracts",
-    "alpha",
-    "beta",
-    "gamma",
-    "delta",
-    "epsilon",
-    "zeta",
-    "iota",
-    "sigma",
-    "mu",
-]
+__all__ = ["Contracts", "alpha", "beta", "delta", "sigma", "mu"]
