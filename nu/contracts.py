@@ -37,6 +37,7 @@ from nu.psi.contracts.beta import SyncConflict as SyncConflict
 from nu.psi.contracts.beta import SyncPlan as SyncPlan
 from nu.psi.contracts.beta import SyncPolicy as SyncPolicy
 from nu.psi.contracts.beta import apply_plan as apply_plan
+from nu.psi.contracts.beta import inherit_derived as inherit_derived
 from nu.psi.contracts.beta import merge_entity as merge_entity
 from nu.psi.contracts.beta import plan_sync as plan_sync
 from nu.psi.contracts.beta import validate_axis as validate_axis
@@ -90,6 +91,7 @@ __all__ = [
     "run_source_contract",
     "run_source_sync_contract",
     "run_storage_contract",
+    "inherit_derived",
     "merge_entity",
     "plan_sync",
     "validate_axis",

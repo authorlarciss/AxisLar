@@ -8,11 +8,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from nu.psi.contracts.alpha import Entity, EntityId, FacetOwner
+from nu.psi.contracts.alpha import Entity, EntityId, FacetOwner, FacetValue, Provenance
 from nu.psi.contracts.delta import IStorageEngine
 
 
@@ -145,7 +146,9 @@ def plan_sync(
         else:
             actions.append(
                 SyncAction(
-                    ActionKind.UPDATE, merge_entity(entity, previous), previous_id=previous.id
+                    ActionKind.UPDATE,
+                    inherit_derived(merge_entity(entity, previous), existing),
+                    previous_id=previous.id,
                 )
             )
 
@@ -157,7 +160,7 @@ def plan_sync(
             else []
         )
         if not target:
-            actions.append(SyncAction(ActionKind.CREATE, entity))
+            actions.append(SyncAction(ActionKind.CREATE, inherit_derived(entity, existing)))
             continue
         if len(target) > 1:
             # Кандидатов не удаляем: выбор делает человек, а tombstone
@@ -175,7 +178,10 @@ def plan_sync(
         actions.append(
             SyncAction(
                 ActionKind.MOVE,
-                merge_entity(entity, previous).model_copy(update={"id": previous.id}),
+                inherit_derived(
+                    merge_entity(entity, previous).model_copy(update={"id": previous.id}),
+                    existing,
+                ),
                 previous_id=previous.id,
             )
         )
@@ -197,6 +203,64 @@ def plan_sync(
             )
 
     return SyncPlan(tuple(actions), tuple(conflicts))
+
+
+def inherit_derived(target: Entity, donors: Iterable[Entity]) -> Entity:
+    """Подхватить производные фасеты у объектов с тем же содержимым (ADR-0017).
+
+    Отдельного кэша нет: им служит само хранилище. Ключ — `content_hash`,
+    а версия анализатора берётся из `derived_by` донора: при смене версии
+    её увидит сам анализатор, сверяя provenance.
+
+    Копируются только фасеты с владельцем `analysis`. При нескольких
+    донорах выигрывает самый свежий `Provenance.at`; если время совпадает,
+    а значения разные — ось пропускается (неоднозначность не разгадываем).
+    """
+    origin = target.origin
+    if origin is None or not origin.content_hash:
+        return target
+
+    best: dict[str, tuple[tuple[FacetValue, ...], Provenance]] = {}
+    ambiguous: set[str] = set()
+
+    for donor in donors:
+        donor_origin = donor.origin
+        if (
+            donor.id == target.id
+            or donor_origin is None
+            or donor_origin.content_hash != origin.content_hash
+            or donor.deleted_at is not None
+        ):
+            continue
+        for axis, values in donor.facets.items():
+            if axis in target.facets:
+                continue
+            provenance = donor.derived_by.get(axis)
+            if donor.owners.get(axis) is not FacetOwner.ANALYSIS or provenance is None:
+                continue
+
+            current = best.get(axis)
+            if current is None or provenance.at > current[1].at:
+                best[axis] = (values, provenance)
+                ambiguous.discard(axis)
+            elif provenance.at == current[1].at and values != current[0]:
+                ambiguous.add(axis)
+
+    if not best:
+        return target
+
+    facets = dict(target.facets)
+    owners = dict(target.owners)
+    derived = dict(target.derived_by)
+    for axis in sorted(best):
+        if axis in ambiguous:
+            continue
+        values, provenance = best[axis]
+        facets[axis] = values
+        owners[axis] = FacetOwner.ANALYSIS
+        derived[axis] = provenance
+
+    return target.model_copy(update={"facets": facets, "owners": owners, "derived_by": derived})
 
 
 def merge_entity(scanned: Entity, existing: Entity) -> Entity:
@@ -299,5 +363,6 @@ __all__ = [
     "SyncPlan",
     "SyncPolicy",
     "apply_plan",
+    "inherit_derived",
     "plan_sync",
 ]

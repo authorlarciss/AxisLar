@@ -7,6 +7,7 @@ from nu.beta.public.sync import SyncError as SyncError
 from nu.beta.public.sync import SyncPlan as SyncPlan
 from nu.beta.public.sync import SyncPolicy as SyncPolicy
 from nu.beta.public.sync import apply_plan as apply_plan
+from nu.beta.public.sync import inherit_derived as inherit_derived
 from nu.beta.public.sync import merge_entity as merge_entity
 from nu.beta.public.sync import plan_sync as plan_sync
 from nu.beta.public.validation import validate_axis as validate_axis
@@ -22,6 +23,7 @@ __all__ = [
     "SyncPlan",
     "SyncPolicy",
     "apply_plan",
+    "inherit_derived",
     "merge_entity",
     "plan_sync",
     "validate_axis",
