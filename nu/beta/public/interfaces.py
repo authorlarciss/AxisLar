@@ -61,7 +61,11 @@ class IStorageEngine(ABC):
 
     @abstractmethod
     async def bulk_upsert(self, entities: Sequence[Entity]) -> list[DomainError]:
-        """Пакетная запись. Возвращает ошибки по всем объектам пачки."""
+        """Пакетная запись. Возвращает ошибки по всем объектам пачки.
+
+        Порядок в пачке не важен: ссылка может указывать на любой объект
+        этой же пачки (проверка по множеству `id`, а не по префиксу).
+        """
 
     @abstractmethod
     async def get(self, entity_id: EntityId) -> Entity | None:
