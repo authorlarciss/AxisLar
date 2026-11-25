@@ -75,21 +75,31 @@ jobs:
 
       # gh CLI вместо softprops/action-gh-release: экшен ретраил 500 от API
       # и падал без внятной причины. Здесь шаг идемпотентен и логирует ответ.
-      # Best effort: GitHub Releases API на этом репозитории отдаёт HTTP 500
-      # даже на ручное создание релиза. Артефакты всегда доступны как
-      # workflow-artifacts (`gh run download`), поэтому шаг не валит CI.
+      # GitHub API на создании релиза периодически отвечает HTTP 500, хотя
+      # релиз создаётся (ответ рвётся). Поэтому create не считается
+      # обязательным: если релиз появился — грузим ассеты в него.
       - name: Attach artifacts to release (best effort)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           tag="${GITHUB_REF_NAME}"
+
           if ! gh release view "$tag" >/dev/null 2>&1; then
-            # --generate-notes отключён: GitHub API отдаёт 500 на автогенерации
-            # release notes для этого репозитория. Заметки берём из CHANGELOG.
             notes="$(awk '/^## \[/{flag=1} flag' CHANGELOG.md | head -40)"
-            gh release create "$tag" --title "$tag" --notes "${notes:-Release $tag}"
+            gh release create "$tag" --title "$tag" --notes "${notes:-Release $tag}" || true
           fi
-          gh release upload "$tag" dist/* --clobber
-          gh release view "$tag" --json assets -q '.assets[].name'
+
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            echo "release $tag is not visible yet; skipped asset upload" >&2
+            exit 0
+          fi
+
+          for attempt in 1 2 3; do
+            if gh release upload "$tag" dist/* --clobber; then
+              break
+            fi
+            sleep 5
+          done
+          gh release view "$tag" --json assets -q '.assets[].name' || true
