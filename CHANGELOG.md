@@ -10,6 +10,22 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-11-25
+
+### Added
+
+- **Синхронизация источника** (ADR-0016): `Origin` в `Entity` (источник,
+  ключ, `content_hash`/`hash_algo`), `deleted_at` — tombstone;
+  `plan_sync(scanned, existing, policy)` — чистая функция с действиями
+  `create/update/move/tombstone/resurrect` и списком конфликтов;
+  `apply_plan(engine, plan)` — применение.
+- Правило переименования: `id` сохраняется, меняется `origin.key`
+  (move определяется по `content_hash`, неоднозначность — конфликт).
+- Неполный скан (`complete=False`) не порождает tombstone.
+- ADR-0017: content-addressed кэш производных фактов (проектирование
+  под будущую реализацию после провенанса).
+- DOMAIN §9: нормативная таблица поведения синхронизации.
+
 ## [0.4.0] - 2025-11-25
 
 ### Added

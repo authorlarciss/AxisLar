@@ -24,12 +24,19 @@ from nu.psi.contracts.alpha import FacetValue as FacetValue
 from nu.psi.contracts.alpha import Filter as Filter
 from nu.psi.contracts.alpha import MeasurableValue as MeasurableValue
 from nu.psi.contracts.alpha import Operator as Operator
+from nu.psi.contracts.alpha import Origin as Origin
 from nu.psi.contracts.alpha import Provenance as Provenance
 from nu.psi.contracts.alpha import Query as Query
 from nu.psi.contracts.alpha import QueryResult as QueryResult
 from nu.psi.contracts.alpha import ReferenceValue as ReferenceValue
 from nu.psi.contracts.alpha import ScalarDefinition as ScalarDefinition
 from nu.psi.contracts.alpha import StorageSchema as StorageSchema
+from nu.psi.contracts.beta import ActionKind as ActionKind
+from nu.psi.contracts.beta import SyncConflict as SyncConflict
+from nu.psi.contracts.beta import SyncPlan as SyncPlan
+from nu.psi.contracts.beta import SyncPolicy as SyncPolicy
+from nu.psi.contracts.beta import apply_plan as apply_plan
+from nu.psi.contracts.beta import plan_sync as plan_sync
 from nu.psi.contracts.beta import validate_axis as validate_axis
 from nu.psi.contracts.beta import validate_entity as validate_entity
 from nu.psi.contracts.beta import validate_query as validate_query
@@ -43,6 +50,7 @@ from nu.psi.contracts.mu import CONTRACT_VERSION as CONTRACT_VERSION
 from nu.psi.contracts.mu import __version__ as __version__
 
 __all__ = [
+    "ActionKind",
     "AxisDefinition",
     "AxisKind",
     "CONTRACT_VERSION",
@@ -59,6 +67,7 @@ __all__ = [
     "IStorageEngine",
     "MeasurableValue",
     "Operator",
+    "Origin",
     "Provenance",
     "Query",
     "QueryResult",
@@ -66,10 +75,15 @@ __all__ = [
     "ScalarDefinition",
     "StorageQueryError",
     "StorageSchema",
+    "SyncConflict",
+    "SyncPlan",
+    "SyncPolicy",
     "__version__",
+    "apply_plan",
     "build_core",
     "run_source_contract",
     "run_storage_contract",
+    "plan_sync",
     "validate_axis",
     "validate_entity",
     "validate_query",
