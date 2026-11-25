@@ -58,7 +58,7 @@ class IStorageEngine(ABC):
 
     @abstractmethod
     async def get(self, entity_id: EntityId) -> Entity | None:
-        """Объект по идентификатору или `None`."""
+        """Объект по идентификатору или `None` (tombstone невидим)."""
 
     @abstractmethod
     async def fetch_many(self, ids: Sequence[EntityId]) -> tuple[Entity, ...]:
@@ -66,11 +66,19 @@ class IStorageEngine(ABC):
 
     @abstractmethod
     async def query(self, query: Query) -> QueryResult:
-        """Исполнить запрос. Валидацию выполняет `validate_query` из `beta`."""
+        """Исполнить запрос. Tombstone в выдачу не попадает."""
 
     @abstractmethod
     async def count(self) -> int:
-        """Количество объектов в хранилище."""
+        """Количество видимых объектов (tombstone не считается)."""
+
+    @abstractmethod
+    async def list_entities(self, include_deleted: bool = False) -> tuple[Entity, ...]:
+        """Все объекты источника/хранилища в порядке `id`.
+
+        `include_deleted=True` нужен синхронизации: без tombstone нельзя
+        отличить «файл удалён» от «файл вернулся».
+        """
 
     @abstractmethod
     def capabilities(self) -> frozenset[Capability]:

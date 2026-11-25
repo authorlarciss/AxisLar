@@ -10,6 +10,22 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-11-25
+
+### Added
+
+- `IStorageEngine.list_entities(include_deleted: bool = False)` — перечень
+  объектов в порядке `id`; tombstone видны только с `include_deleted=True`.
+- Контрактный набор проверяет tombstone-семантику: `get`, `count`,
+  `query`, `list_entities` не видят удалённых, `include_deleted=True`
+  видит, resurrect возвращает объект.
+
+### Changed
+
+- **`CONTRACT_VERSION = "3"`**: добавлен абстрактный метод порта —
+  бэкенды-плагины обязаны его реализовать. Старые плагины (`>=2,<3`) будут
+  отклонены реестром с явной причиной.
+
 ## [0.5.0] - 2025-11-25
 
 ### Added

@@ -118,14 +118,23 @@ class MemoryStorage(IStorageEngine):
     # --------------------------------------------------------------- чтение
 
     async def get(self, entity_id: EntityId) -> Entity | None:
-        return self._entities.get(entity_id)
+        entity = self._entities.get(entity_id)
+        return entity if _visible(entity) else None
 
     async def fetch_many(self, ids: Sequence[EntityId]) -> tuple[Entity, ...]:
-        found = (self._entities[entity_id] for entity_id in ids if entity_id in self._entities)
+        found = (
+            self._entities[entity_id]
+            for entity_id in ids
+            if entity_id in self._entities and _visible(self._entities[entity_id])
+        )
         return tuple(found)
 
     async def count(self) -> int:
-        return len(self._entities)
+        return sum(1 for entity in self._entities.values() if _visible(entity))
+
+    async def list_entities(self, include_deleted: bool = False) -> tuple[Entity, ...]:
+        entities = (self._entities[entity_id] for entity_id in sorted(self._entities))
+        return tuple(entity for entity in entities if include_deleted or _visible(entity))
 
     # --------------------------------------------------------------- запрос
 
@@ -137,7 +146,8 @@ class MemoryStorage(IStorageEngine):
         matched = [
             entity_id
             for entity_id in sorted(self._entities)
-            if all(
+            if _visible(self._entities[entity_id])
+            and all(
                 _matches(self._entities[entity_id], condition, self._schema)
                 for condition in query.all
             )
@@ -150,6 +160,11 @@ class MemoryStorage(IStorageEngine):
 
     def capabilities(self) -> frozenset[Capability]:
         return MEMORY_CAPABILITIES
+
+
+def _visible(entity: Entity | None) -> bool:
+    """Объект есть и не помечен удалённым."""
+    return entity is not None and entity.deleted_at is None
 
 
 def _matches(entity: Entity, condition: Filter, schema: StorageSchema) -> bool:

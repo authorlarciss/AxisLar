@@ -19,6 +19,7 @@ reference-фасеты, кардинальность, выдачу и пагин
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import UTC, datetime
 
 from nu.psi.contracts.alpha import (
     AxisDefinition,
@@ -99,6 +100,7 @@ async def run_storage_contract(factory: _BACKEND, schema: StorageSchema | None =
     await _check_sparsity(engine)
     await _check_pagination(engine)
     await _check_rejection(engine)
+    await _check_tombstones(engine)
 
 
 async def _check_schema(engine: IStorageEngine, schema: StorageSchema) -> None:
@@ -271,3 +273,36 @@ async def _collect(source: IEntitySource, schema: StorageSchema) -> tuple[Entity
         assert errors == [], f"source produced entity invalid against schema: {errors[0]}"
         collected.append(entity)
     return tuple(collected)
+
+
+async def _check_tombstones(engine: IStorageEngine) -> None:
+    """Tombstone-семантика: объект скрыт из выдачи, но виден синхронизации."""
+    target = EntityId("b-2")
+    original = await engine.get(target)
+    assert original is not None, "contract entity must exist before tombstone check"
+
+    tombstone = original.model_copy(update={"deleted_at": datetime.now(UTC)})
+    errors = await engine.upsert(tombstone)
+    assert errors == [], f"tombstone write failed: {errors}"
+
+    assert await engine.get(target) is None, "tombstone must be invisible via get"
+    assert await engine.count() == 2, "tombstone must not be counted"
+
+    visible = {str(entity.id) for entity in await engine.list_entities()}
+    assert str(target) not in visible, "tombstone must be invisible in list_entities()"
+    assert len(visible) == 2, "list_entities() must return visible objects only"
+
+    everything = {str(entity.id) for entity in await engine.list_entities(include_deleted=True)}
+    assert str(target) in everything and len(everything) == 3, (
+        "list_entities(include_deleted=True) must expose tombstones"
+    )
+
+    result = await engine.query(Query())
+    assert str(target) not in [str(entity_id) for entity_id in result.ids], (
+        "tombstone must not appear in query results"
+    )
+    assert result.total == 2, "query total must exclude tombstones"
+
+    restored = original.model_copy(update={"deleted_at": None})
+    assert await engine.upsert(restored) == [], "resurrect failed"
+    assert await engine.count() == 3, "resurrect must bring the object back"
