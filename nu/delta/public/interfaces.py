@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import AsyncIterator, Sequence
 
 from nu.psi.contracts.alpha import (
     AxisDefinition,
@@ -77,4 +77,25 @@ class IStorageEngine(ABC):
         """Возможности бэкенда (синхронно: это статическое свойство)."""
 
 
-__all__ = ["IStorageEngine"]
+class IEntitySource(ABC):
+    """Источник объектов: внешние данные, приведённые к модели ядра.
+
+    Адаптер (файловое дерево, SQL, внешний API) сам отвечает за
+    нормализацию: он решает, что станет осью, а что скаляром, и как
+    строить стабильные `id`. Ядро лишь требует, чтобы результат был
+    согласован со схемой (это проверяет `run_source_contract`).
+
+    `scan` — асинхронный итератор: дерево может быть большим, и держать
+    все объекты в памяти не нужно.
+    """
+
+    @abstractmethod
+    def describe(self) -> str:
+        """Человекочитаемое описание источника (путь, DSN, ...)."""
+
+    @abstractmethod
+    def scan(self) -> AsyncIterator[Entity]:
+        """Отдать объекты источника. Повторный вызов даёт тот же набор `id`."""
+
+
+__all__ = ["IEntitySource", "IStorageEngine"]

@@ -36,7 +36,8 @@ from nu.psi.contracts.alpha import (
     ScalarDefinition,
     StorageSchema,
 )
-from nu.psi.contracts.delta import IStorageEngine, StorageQueryError
+from nu.psi.contracts.beta import validate_entity
+from nu.psi.contracts.delta import IEntitySource, IStorageEngine, StorageQueryError
 
 #: Схема, на которой проверяется бэкенд.
 CONTRACT_SCHEMA = StorageSchema(
@@ -232,4 +233,41 @@ def _ids(result: QueryResult) -> list[str]:
     return [str(entity_id) for entity_id in result.ids]
 
 
-__all__ = ["CONTRACT_ENTITIES", "CONTRACT_SCHEMA", "run_storage_contract"]
+__all__ = [
+    "CONTRACT_ENTITIES",
+    "CONTRACT_SCHEMA",
+    "run_source_contract",
+    "run_storage_contract",
+]
+
+
+async def run_source_contract(factory: Callable[[], IEntitySource], schema: StorageSchema) -> None:
+    """Проверить адаптер источника против схемы (а не реализацию).
+
+    Требования: `describe()` непустой; `scan()` отдаёт объекты, валидные
+    против схемы; `id` непустые и уникальные; повторное сканирование даёт
+    тот же набор `id` (иначе импорт не идемпотентен).
+    """
+    source = factory()
+    assert source.describe().strip(), "source.describe() must be non-empty"
+
+    first = await _collect(source, schema)
+    second = await _collect(source, schema)
+
+    assert {entity.id for entity in first} == {entity.id for entity in second}, (
+        "scan must be deterministic: repeated scan produced different ids"
+    )
+
+
+async def _collect(source: IEntitySource, schema: StorageSchema) -> tuple[Entity, ...]:
+    seen: set[str] = set()
+    collected: list[Entity] = []
+    async for entity in source.scan():
+        assert str(entity.id).strip(), "entity id must be non-empty"
+        assert str(entity.id) not in seen, f"duplicate entity id in scan: {entity.id!r}"
+        seen.add(str(entity.id))
+
+        errors = validate_entity(schema, entity, capabilities=frozenset())
+        assert errors == [], f"source produced entity invalid against schema: {errors[0]}"
+        collected.append(entity)
+    return tuple(collected)

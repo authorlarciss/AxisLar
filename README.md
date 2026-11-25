@@ -56,7 +56,7 @@ AxisLar — абстрактное ядро для многомерных дан
 | `alpha` | DTO и словарь домена: `Entity`, `AxisDefinition`, `FacetValue`, `StorageSchema`, `Query`, `QueryResult`, `Capability`, `DomainError` |
 | `beta` | Доменные правила: `validate_axis/scalar/entity/query` (чистые функции) |
 | `delta` | Хранилище: порт `IStorageEngine`, эталонный `MemoryStorage`, ошибки исполнения |
-| `iota` | Контрактный набор для авторов бэкендов (`run_storage_contract`) |
+| `iota` | Контрактные наборы для внешних адаптеров (`run_storage_contract`, `run_source_contract`) |
 | `sigma` | Логирование |
 | `mu` | Версии: `__version__`, `CONTRACT_VERSION` |
 | `psi` | Сборка ядра: `build_core()`, фасад `Core`, контракты модулей |
