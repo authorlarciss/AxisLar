@@ -24,6 +24,7 @@
 | `alpha` | DTO и словарь домена: оси, фасеты, объекты, запросы, `Capability`, `DomainError` |
 | `beta` | Доменные правила: `validate_axis/scalar/entity/query` — чистые функции |
 | `delta` | Хранилище: порт `IStorageEngine`, эталонный `MemoryStorage`, `StorageQueryError` |
+| `iota` | Контрактные наборы (`run_storage_contract`, `run_source_sync_contract`) и политика `entity_id_for(source_id, key)` |
 | `sigma` | Логи и контекст запроса |
 | `mu` | Метаданные: `__version__`, `CONTRACT_VERSION` |
 | `psi` | Композиционный корень: контракты, фасад `Core`, `build_core()` |
@@ -59,8 +60,10 @@ result = await core.query(query)
 |----------|-----|------------|
 | DTO модели | `alpha` | язык обмена: продукт, плагины, клиенты |
 | `validate_*` | `beta` | проверки без исполнения, ошибки — значениями |
-| `IStorageEngine` | `delta` | порт для бэкендов-плагинов |
+| `IStorageEngine` | `delta` | порт для бэкендов-плагинов (tombstone-семантика: `list_entities(include_deleted)`) |
+| `IEntitySource` | `delta` | порт источника (`describe`, `scan`) |
 | `StorageQueryError` | `delta` | отказ движка на невалидированном запросе |
+| `plan_sync`/`apply_plan`/`merge_entity`/`inherit_derived` | `beta` | синхронизация: план, слияние по владельцам, reuse по хэшу |
 | `Core`, `build_core` | `psi` | вход в ядро |
 
 `CONTRACT_VERSION` (в `mu`) — версия этой поверхности. Меняется при
