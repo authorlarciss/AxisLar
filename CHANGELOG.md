@@ -10,6 +10,15 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.3] - 2025-11-25
+
+### Fixed
+
+- CI: прикрепление артефактов переведено на `gh release create/upload`
+  вместо `softprops/action-gh-release` — тот ретраил HTTP 500 от GitHub
+  API и падал без диагностики. Шаг идемпотентен, логирует список
+  прикреплённых файлов.
+
 ## [0.2.2] - 2025-11-25
 
 ### Fixed

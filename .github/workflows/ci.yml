@@ -73,8 +73,16 @@ jobs:
           name: dist
           path: dist/*
 
+      # gh CLI вместо softprops/action-gh-release: экшен ретраил 500 от API
+      # и падал без внятной причины. Здесь шаг идемпотентен и логирует ответ.
       - name: Attach artifacts to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --title "$tag" --generate-notes
+          fi
+          gh release upload "$tag" dist/* --clobber
+          gh release view "$tag" --json assets -q '.assets[].name'
