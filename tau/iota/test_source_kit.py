@@ -9,13 +9,14 @@ import pytest
 from nu.contracts import run_source_contract
 from nu.delta.public.interfaces import IEntitySource
 from nu.iota.public.contract_kit import CONTRACT_SCHEMA
-from nu.psi.contracts.alpha import CategoricalValue, Entity, EntityId
+from nu.psi.contracts.alpha import CategoricalValue, Entity, EntityId, FacetOwner
 
 ENTITIES: tuple[Entity, ...] = (
     Entity(
         id=EntityId("a-1"),
         kind="edit",
         facets={"theme": (CategoricalValue(value="cyberpunk"),)},
+        owners={"theme": FacetOwner.SOURCE},
     ),
     Entity(id=EntityId("b-2"), kind="note"),
 )

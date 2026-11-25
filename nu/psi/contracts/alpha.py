@@ -11,6 +11,7 @@ from nu.alpha.public import DomainError as DomainError
 from nu.alpha.public import Entity as Entity
 from nu.alpha.public import EntityId as EntityId
 from nu.alpha.public import ErrorCode as ErrorCode
+from nu.alpha.public import FacetOwner as FacetOwner
 from nu.alpha.public import FacetValue as FacetValue
 from nu.alpha.public import Filter as Filter
 from nu.alpha.public import MeasurableValue as MeasurableValue
@@ -31,6 +32,7 @@ __all__ = [
     "DomainError",
     "Entity",
     "EntityId",
+    "FacetOwner",
     "ErrorCode",
     "FacetValue",
     "Filter",

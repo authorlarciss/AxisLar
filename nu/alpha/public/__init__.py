@@ -10,6 +10,7 @@ from nu.alpha.public.axes import AxisKind as AxisKind
 from nu.alpha.public.axes import ScalarDefinition as ScalarDefinition
 from nu.alpha.public.capabilities import Capability as Capability
 from nu.alpha.public.entities import Entity as Entity
+from nu.alpha.public.entities import FacetOwner as FacetOwner
 from nu.alpha.public.entities import Origin as Origin
 from nu.alpha.public.entities import Provenance as Provenance
 from nu.alpha.public.errors import DomainError as DomainError
@@ -33,6 +34,7 @@ __all__ = [
     "DomainError",
     "Entity",
     "EntityId",
+    "FacetOwner",
     "ErrorCode",
     "FacetValue",
     "Filter",

@@ -9,7 +9,7 @@ import pytest
 from nu.contracts import entity_id_for, run_source_sync_contract
 from nu.delta.public.interfaces import IEntitySource
 from nu.iota.public.contract_kit import CONTRACT_SCHEMA
-from nu.psi.contracts.alpha import CategoricalValue, Entity, EntityId, Origin
+from nu.psi.contracts.alpha import CategoricalValue, Entity, EntityId, FacetOwner, Origin
 
 
 def make_entity(
@@ -24,6 +24,7 @@ def make_entity(
         id=entity_id,
         kind="edit",
         facets={"theme": (CategoricalValue(value="cyberpunk"),)},
+        owners={"theme": FacetOwner.SOURCE},
         origin=Origin(
             source_id=source_id,
             key=key,

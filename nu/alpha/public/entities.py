@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from enum import StrEnum
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -31,6 +32,14 @@ class Origin(BaseModel):
         if (self.content_hash is None) != (self.hash_algo is None):
             raise ValueError("content_hash and hash_algo must be set together")
         return self
+
+
+class FacetOwner(StrEnum):
+    """Кто владеет фасетом: источник, человек или анализ (ADR-0018)."""
+
+    SOURCE = "source"
+    USER = "user"
+    ANALYSIS = "analysis"
 
 
 class Provenance(BaseModel):
@@ -67,6 +76,7 @@ class Entity(BaseModel):
     kind: str = Field(min_length=1)
     scalars: dict[str, str] = {}
     facets: dict[str, tuple[FacetValue, ...]] = {}
+    owners: dict[str, FacetOwner] = {}
     derived_by: dict[str, Provenance] = {}
     origin: Origin | None = None
     deleted_at: datetime | None = None
@@ -79,10 +89,14 @@ class Entity(BaseModel):
         if self.deleted_at is not None and self.deleted_at.tzinfo is None:
             raise ValueError("deleted_at must be timezone-aware")
 
+        stray_owners = sorted(set(self.owners) - set(self.facets))
+        if stray_owners:
+            raise ValueError(f"entity {self.id!r}: owners refer to missing facets {stray_owners}")
+
         unknown = sorted(set(self.derived_by) - set(self.facets))
         if unknown:
             raise ValueError(f"entity {self.id!r}: provenance refers to missing facets {unknown}")
         return self
 
 
-__all__ = ["Entity", "Origin", "Provenance"]
+__all__ = ["Entity", "FacetOwner", "Origin", "Provenance"]

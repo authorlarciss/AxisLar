@@ -20,6 +20,7 @@ from nu.psi.contracts.alpha import DomainError as DomainError
 from nu.psi.contracts.alpha import Entity as Entity
 from nu.psi.contracts.alpha import EntityId as EntityId
 from nu.psi.contracts.alpha import ErrorCode as ErrorCode
+from nu.psi.contracts.alpha import FacetOwner as FacetOwner
 from nu.psi.contracts.alpha import FacetValue as FacetValue
 from nu.psi.contracts.alpha import Filter as Filter
 from nu.psi.contracts.alpha import MeasurableValue as MeasurableValue
@@ -36,6 +37,7 @@ from nu.psi.contracts.beta import SyncConflict as SyncConflict
 from nu.psi.contracts.beta import SyncPlan as SyncPlan
 from nu.psi.contracts.beta import SyncPolicy as SyncPolicy
 from nu.psi.contracts.beta import apply_plan as apply_plan
+from nu.psi.contracts.beta import merge_entity as merge_entity
 from nu.psi.contracts.beta import plan_sync as plan_sync
 from nu.psi.contracts.beta import validate_axis as validate_axis
 from nu.psi.contracts.beta import validate_entity as validate_entity
@@ -63,6 +65,7 @@ __all__ = [
     "Entity",
     "EntityId",
     "ErrorCode",
+    "FacetOwner",
     "FacetValue",
     "Filter",
     "IEntitySource",
@@ -87,6 +90,7 @@ __all__ = [
     "run_source_contract",
     "run_source_sync_contract",
     "run_storage_contract",
+    "merge_entity",
     "plan_sync",
     "validate_axis",
     "validate_entity",

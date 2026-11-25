@@ -29,6 +29,7 @@ from nu.psi.contracts.alpha import (
     Entity,
     EntityId,
     ErrorCode,
+    FacetOwner,
     Filter,
     MeasurableValue,
     Operator,
@@ -273,6 +274,15 @@ async def _collect(source: IEntitySource, schema: StorageSchema) -> tuple[Entity
 
         errors = validate_entity(schema, entity, capabilities=frozenset())
         assert errors == [], f"source produced entity invalid against schema: {errors[0]}"
+
+        assert set(entity.owners) == set(entity.facets), (
+            f"source must declare owners for every facet: {sorted(entity.facets)}"
+        )
+        non_source = sorted(
+            axis for axis, owner in entity.owners.items() if owner is not FacetOwner.SOURCE
+        )
+        assert not non_source, f"source facet owners must be SOURCE, got {non_source}"
+
         collected.append(entity)
     return tuple(collected)
 

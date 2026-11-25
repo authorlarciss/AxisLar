@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from nu.psi.contracts.alpha import Entity, EntityId
+from nu.psi.contracts.alpha import Entity, EntityId, FacetOwner
 from nu.psi.contracts.delta import IStorageEngine
 
 
@@ -135,11 +135,19 @@ def plan_sync(
 
         matched.add(previous.id)
         if previous.deleted_at is not None:
-            actions.append(SyncAction(ActionKind.RESURRECT, entity, previous_id=previous.id))
-        elif _same_facts(previous, entity):
+            actions.append(
+                SyncAction(
+                    ActionKind.RESURRECT, merge_entity(entity, previous), previous_id=previous.id
+                )
+            )
+        elif _same_source_facts(previous, entity):
             continue
         else:
-            actions.append(SyncAction(ActionKind.UPDATE, entity, previous_id=previous.id))
+            actions.append(
+                SyncAction(
+                    ActionKind.UPDATE, merge_entity(entity, previous), previous_id=previous.id
+                )
+            )
 
     for entity in pending:
         assert entity.origin is not None  # проверено выше
@@ -167,7 +175,7 @@ def plan_sync(
         actions.append(
             SyncAction(
                 ActionKind.MOVE,
-                entity.model_copy(update={"id": previous.id}),
+                merge_entity(entity, previous).model_copy(update={"id": previous.id}),
                 previous_id=previous.id,
             )
         )
@@ -191,6 +199,42 @@ def plan_sync(
     return SyncPlan(tuple(actions), tuple(conflicts))
 
 
+def merge_entity(scanned: Entity, existing: Entity) -> Entity:
+    """Слить объект источника с сохранёнными чужими фасетами (ADR-0018).
+
+    Правила:
+    - фасет источника обновляется значением из скана;
+    - фасет, который источник больше не отдаёт (владелец `source`),
+      удаляется — источник авторитетен для своих осей;
+    - фасеты `user` и `analysis` сохраняются как есть;
+    - `derived_by` сохраняется только для сохранившихся фасетов.
+    """
+    facets = dict(scanned.facets)
+    owners = dict.fromkeys(facets, FacetOwner.SOURCE)
+    for axis, values in existing.facets.items():
+        if axis in facets:
+            continue
+        owner = existing.owners.get(axis, FacetOwner.USER)
+        if owner is FacetOwner.SOURCE:
+            continue
+        facets[axis] = values
+        owners[axis] = owner
+
+    derived = {
+        axis: provenance
+        for axis, provenance in existing.derived_by.items()
+        if axis in facets and owners.get(axis) is FacetOwner.ANALYSIS
+    }
+    return scanned.model_copy(
+        update={
+            "facets": facets,
+            "owners": owners,
+            "derived_by": derived,
+            "deleted_at": None,
+        }
+    )
+
+
 async def apply_plan(engine: IStorageEngine, plan: SyncPlan) -> int:
     """Применить план к хранилищу. Возвращает число выполненных действий."""
     applied = 0
@@ -202,16 +246,28 @@ async def apply_plan(engine: IStorageEngine, plan: SyncPlan) -> int:
     return applied
 
 
-def _same_facts(previous: Entity, scanned: Entity) -> bool:
-    """Совпадают ли факты источника (содержимое, фасеты, скаляры)."""
+def _same_source_facts(previous: Entity, scanned: Entity) -> bool:
+    """Совпадают ли факты источника: содержимое и его собственные фасеты.
+
+    Фасеты `user`/`analysis` в сравнение не входят — иначе ручная правка
+    выглядела бы как изменение источника и запускала бы перезапись.
+    """
     prev_hash = previous.origin.content_hash if previous.origin else None
     next_hash = scanned.origin.content_hash if scanned.origin else None
-    return (
-        prev_hash == next_hash
-        and previous.facets == scanned.facets
-        and previous.scalars == scanned.scalars
-        and previous.kind == scanned.kind
-    )
+    if prev_hash != next_hash or previous.scalars != scanned.scalars:
+        return False
+    if previous.kind != scanned.kind:
+        return False
+    return _source_facets(previous) == scanned.facets
+
+
+def _source_facets(entity: Entity) -> dict[str, object]:
+    """Фасеты, которыми владеет источник."""
+    return {
+        axis: values
+        for axis, values in entity.facets.items()
+        if entity.owners.get(axis, FacetOwner.SOURCE) is FacetOwner.SOURCE
+    }
 
 
 def _find_move_candidate(
