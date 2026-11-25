@@ -10,6 +10,13 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.2.5] - 2025-11-25
+
+### Added
+
+- `py.typed` (PEP 561): типы ядра видны mypy strict у потребителей —
+  продукт и плагины проверяются без `ignore_missing_imports`.
+
 ## [0.2.4] - 2025-11-25
 
 ### Fixed

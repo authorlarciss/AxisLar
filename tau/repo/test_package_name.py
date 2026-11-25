@@ -27,3 +27,8 @@ def test_pyproject_ships_nu_package() -> None:
 def test_distribution_name_is_unique() -> None:
     data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert data["project"]["name"] == "axislar-core"
+
+
+def test_py_typed_marker_is_shipped() -> None:
+    """PEP 561: без маркера mypy у потребителей не видит типы ядра."""
+    assert (ROOT / "nu" / "py.typed").is_file()

@@ -29,6 +29,9 @@ dev = [
 [tool.setuptools.dynamic]
 version = { attr = "nu.mu.public.__version__" }
 
+[tool.setuptools.package-data]
+nu = ["py.typed"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["nu*"]
