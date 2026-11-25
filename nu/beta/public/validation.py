@@ -27,6 +27,7 @@ from nu.psi.contracts.alpha import (
     Operator,
     Query,
     ReferenceValue,
+    ScalarDefinition,
     StorageSchema,
 )
 
@@ -74,6 +75,27 @@ def validate_axis(schema: StorageSchema, axis: AxisDefinition) -> list[DomainErr
                 code=ErrorCode.DUPLICATE_AXIS,
                 detail="name is already used by a scalar",
                 axis=axis.name,
+            )
+        ]
+    return []
+
+
+def validate_scalar(schema: StorageSchema, scalar: ScalarDefinition) -> list[DomainError]:
+    """Можно ли добавить скаляр в схему (уникальность имени)."""
+    if schema.scalar(scalar.name) is not None:
+        return [
+            DomainError(
+                code=ErrorCode.DUPLICATE_SCALAR,
+                detail="scalar already exists",
+                scalar=scalar.name,
+            )
+        ]
+    if schema.axis(scalar.name) is not None:
+        return [
+            DomainError(
+                code=ErrorCode.DUPLICATE_SCALAR,
+                detail="name is already used by an axis",
+                scalar=scalar.name,
             )
         ]
     return []
@@ -279,4 +301,4 @@ def _check_condition(
     return errors
 
 
-__all__ = ["validate_axis", "validate_entity", "validate_query"]
+__all__ = ["validate_axis", "validate_entity", "validate_query", "validate_scalar"]

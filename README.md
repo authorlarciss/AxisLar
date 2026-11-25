@@ -71,8 +71,24 @@ AxisLar — абстрактное ядро для многомерных дан
 ```bash
 make install   # uv sync + pre-commit hook
 make check     # формат, линт, контракты, типы, тесты
-make run       # точка входа
 ```
+
+## CLI
+
+```bash
+axislar --state vault.json schema add-axis --name theme --kind categorical --multi
+axislar --state vault.json schema add-scalar --name title --searchable
+axislar --state vault.json put --id e1 --kind edit --facet theme=cyberpunk,noir --scalar title=Alpha
+axislar --state vault.json query --filter theme:contains=noir --json
+axislar --state vault.json show --id e1
+```
+
+`--state` — снимок in-memory хранилища (JSON-файл), а не бэкенд: запросы к
+файлу не выполняются. Настоящий файловый бэкенд — отдельный этап (PLAN M6).
+
+Операторы фильтра: `contains`, `any_of`, `none_of`, `exists`, `not_exists`,
+`eq`, `gt`, `lt`, `gte`, `lte`, `between`, `scalar_eq`. `!=` нет: на
+мультизначной оси он неоднозначен (ADR-0012).
 
 ## Происхождение
 

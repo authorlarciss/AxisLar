@@ -18,6 +18,7 @@ from nu.psi.contracts.alpha import (
     EntityId,
     Query,
     QueryResult,
+    ScalarDefinition,
     StorageSchema,
 )
 
@@ -54,6 +55,10 @@ class IStorageEngine(ABC):
     @abstractmethod
     async def add_axis(self, axis: AxisDefinition) -> list[DomainError]:
         """Добавить ось. Существующие объекты становятся разреженными (ADR-0010)."""
+
+    @abstractmethod
+    async def add_scalar(self, scalar: ScalarDefinition) -> list[DomainError]:
+        """Добавить текстовое поле в схему."""
 
     @abstractmethod
     async def upsert(self, entity: Entity) -> list[DomainError]:

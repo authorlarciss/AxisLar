@@ -20,6 +20,7 @@ from nu.psi.contracts.alpha import (
     Query,
     QueryResult,
     ReferenceValue,
+    ScalarDefinition,
     StorageSchema,
 )
 from nu.psi.contracts.beta import (
@@ -30,6 +31,7 @@ from nu.psi.contracts.beta import (
     validate_axis,
     validate_entity,
     validate_query,
+    validate_scalar,
 )
 
 #: Всё, что умеет память: полный перебор всегда доступен, ссылки проверяемы.
@@ -75,6 +77,12 @@ class MemoryStorage(IStorageEngine):
         return errors
 
     # --------------------------------------------------------------- запись
+
+    async def add_scalar(self, scalar: ScalarDefinition) -> list[DomainError]:
+        errors = validate_scalar(self._schema, scalar)
+        if not errors:
+            self._schema = self._schema.with_scalar(scalar)
+        return errors
 
     async def upsert(self, entity: Entity) -> list[DomainError]:
         errors = validate_entity(
@@ -145,6 +153,22 @@ class MemoryStorage(IStorageEngine):
         if query.limit is not None:
             window = window[: query.limit]
         return QueryResult(ids=tuple(window), total=total, limit=query.limit, offset=query.offset)
+
+    @property
+    def schema(self) -> StorageSchema:
+        """Схема без `await` — для снимков и отладки."""
+        return self._schema
+
+    def iter_entities(self) -> tuple[Entity, ...]:
+        """Все объекты в детерминированном порядке (для снимков)."""
+        return tuple(self._entities[entity_id] for entity_id in sorted(self._entities))
+
+    def upsert_sync(self, entity: Entity) -> list[DomainError]:
+        """Синхронная запись без ссылочной проверки — для загрузки снимка."""
+        errors = validate_entity(self._schema, entity, capabilities=frozenset())
+        if not errors:
+            self._entities[entity.id] = entity
+        return errors
 
     def capabilities(self) -> frozenset[Capability]:
         return MEMORY_CAPABILITIES

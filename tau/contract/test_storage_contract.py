@@ -245,6 +245,25 @@ async def test_add_axis_keeps_existing_objects_sparse(backend: Backend) -> None:
     assert await engine.count() == 3, "объекты не материализуют новую ось"
 
 
+async def test_add_scalar_enables_scalar_query(backend: Backend) -> None:
+    engine = backend(StorageSchema())
+    assert await engine.add_scalar(ScalarDefinition(name="title", searchable=True)) == []
+    obj = Entity.model_validate({"id": "e-1", "kind": "edit", "scalars": {"title": "Alpha"}})
+    assert await engine.upsert(obj) == []
+
+    result = await engine.query(
+        Query(all=(Filter(axis="title", op=Operator.SCALAR_EQ, values=("Alpha",)),))
+    )
+    assert ids(result) == ["e-1"]
+
+
+async def test_add_duplicate_scalar_is_rejected(backend: Backend) -> None:
+    engine = backend(StorageSchema())
+    await engine.add_scalar(ScalarDefinition(name="title"))
+    errors = await engine.add_scalar(ScalarDefinition(name="title"))
+    assert codes(errors) == {ErrorCode.DUPLICATE_SCALAR.value}
+
+
 async def test_add_duplicate_axis_is_rejected(backend: Backend) -> None:
     engine = backend(SCHEMA)
     errors = await engine.add_axis(AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL))
