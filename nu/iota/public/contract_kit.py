@@ -21,6 +21,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import UTC, datetime
 
+from nu.iota.public.ids import entity_id_for
 from nu.psi.contracts.alpha import (
     AxisDefinition,
     AxisKind,
@@ -239,6 +240,7 @@ __all__ = [
     "CONTRACT_ENTITIES",
     "CONTRACT_SCHEMA",
     "run_source_contract",
+    "run_source_sync_contract",
     "run_storage_contract",
 ]
 
@@ -306,3 +308,33 @@ async def _check_tombstones(engine: IStorageEngine) -> None:
     restored = original.model_copy(update={"deleted_at": None})
     assert await engine.upsert(restored) == [], "resurrect failed"
     assert await engine.count() == 3, "resurrect must bring the object back"
+
+
+async def run_source_sync_contract(
+    factory: Callable[[], IEntitySource], schema: StorageSchema
+) -> None:
+    """Проверить, что источник пригоден для синхронизации (ADR-0016).
+
+    Дополнительно к базовому набору: повторный скан даёт те же объекты
+    целиком (не только те же `id`), `id` соответствует политике
+    `entity_id_for(source_id, key)`, у каждого объекта есть
+    `content_hash` — без него невозможно отследить переименование.
+    """
+    first = await _collect(factory(), schema)
+    second = await _collect(factory(), schema)
+
+    by_id_first = {str(entity.id): entity for entity in first}
+    by_id_second = {str(entity.id): entity for entity in second}
+    assert by_id_first == by_id_second, (
+        "sync source must be stable: repeated scan produced different objects"
+    )
+
+    for entity in first:
+        origin = entity.origin
+        assert origin is not None, f"sync source must set origin: {entity.id!r}"
+        assert str(entity.id) == str(entity_id_for(origin.source_id, origin.key)), (
+            f"id {entity.id!r} does not follow entity_id_for(source_id, key)"
+        )
+        assert origin.content_hash and origin.hash_algo, (
+            f"sync source must provide content_hash/hash_algo: {entity.id!r}"
+        )

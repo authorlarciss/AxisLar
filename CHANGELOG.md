@@ -10,6 +10,19 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.6.1] - 2025-11-25
+
+### Added
+
+- Политика идентичности `entity_id_for(source_id, key)` (`nu.iota`):
+  детерминированный `UUIDv5` в пространстве имён AxisLar; экспорт через
+  фасад `nu.contracts`. Адаптеры обязаны пользоваться ею, иначе
+  `plan_sync` не сопоставит объекты.
+- `run_source_sync_contract(factory, schema)`: стабильность повторного
+  скана (объекты целиком, не только `id`), соответствие `id` политике,
+  наличие `content_hash`/`hash_algo` — без хэша переименования не
+  отслеживаются.
+
 ## [0.6.0] - 2025-11-25
 
 ### Added

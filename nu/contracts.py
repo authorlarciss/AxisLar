@@ -44,7 +44,9 @@ from nu.psi.contracts.beta import validate_scalar as validate_scalar
 from nu.psi.contracts.delta import IEntitySource as IEntitySource
 from nu.psi.contracts.delta import IStorageEngine as IStorageEngine
 from nu.psi.contracts.delta import StorageQueryError as StorageQueryError
+from nu.psi.contracts.iota import entity_id_for as entity_id_for
 from nu.psi.contracts.iota import run_source_contract as run_source_contract
+from nu.psi.contracts.iota import run_source_sync_contract as run_source_sync_contract
 from nu.psi.contracts.iota import run_storage_contract as run_storage_contract
 from nu.psi.contracts.mu import CONTRACT_VERSION as CONTRACT_VERSION
 from nu.psi.contracts.mu import __version__ as __version__
@@ -81,7 +83,9 @@ __all__ = [
     "__version__",
     "apply_plan",
     "build_core",
+    "entity_id_for",
     "run_source_contract",
+    "run_source_sync_contract",
     "run_storage_contract",
     "plan_sync",
     "validate_axis",
