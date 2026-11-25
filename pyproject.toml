@@ -85,7 +85,6 @@ markers = [
     "integration: несколько модулей через psi.bootstrap",
     "contract: контрактный набор, параметризуется по реализации (бэкенду)",
     "e2e: полный конвейер от входа до выхода",
-    "template: тесты самого шаблона; удаляются при форке (make strip-template)",
 ]
 
 [tool.coverage.run]

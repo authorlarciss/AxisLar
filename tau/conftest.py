@@ -1,10 +1,10 @@
 """Общие фикстуры тестов и авто-маркировка уровня.
 
 Раскладка ``tau/`` — по модулям (ADR-0008). Уровень теста выражается
-маркером, а не каталогом: каталог ``tau/template`` даёт маркер
-``template``, ``tau/contract`` — ``contract``, ``tau/e2e`` — ``e2e``,
-всё остальное по умолчанию ``unit``. Файл может выставить уровень сам
-(``pytestmark = pytest.mark.integration``) — авто-маркировка его не тронет.
+маркером, а не каталогом: ``tau/contract`` даёт маркер ``contract``,
+``tau/e2e`` — ``e2e``, всё остальное по умолчанию ``unit``. Файл может
+выставить уровень сам (``pytestmark = pytest.mark.integration``) —
+авто-маркировка его не тронет.
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ TAU_ROOT = Path(__file__).resolve().parent
 
 #: Каталог tau/ -> маркер уровня.
 DIRECTORY_LEVELS: dict[str, str] = {
-    "template": "template",
     "contract": "contract",
     "e2e": "e2e",
 }
@@ -26,7 +25,7 @@ DIRECTORY_LEVELS: dict[str, str] = {
 DEFAULT_LEVEL = "unit"
 
 #: Все легальные уровни.
-LEVELS: tuple[str, ...] = ("unit", "integration", "contract", "e2e", "template")
+LEVELS: tuple[str, ...] = ("unit", "integration", "contract", "e2e")
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:

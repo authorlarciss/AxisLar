@@ -2,14 +2,13 @@
 
 Ось каталогов — модуль, уровень теста — маркер. Эти тесты не дают
 раскладке снова расползтись на ``tau/unit`` + ``tau/<module>``, как это
-случилось в VaultLar.
+случилось в VaultLar. Файл живёт в ``tau/repo`` — это инвариант
+репозитория, а не отдельного модуля.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-
-import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 NU_ROOT = ROOT / "nu"
@@ -17,12 +16,10 @@ TAU_ROOT = ROOT / "tau"
 
 #: Каталоги tau/ без модуля-владельца: тестируют отношения между модулями
 #: или обслуживают репозиторий.
-SHARED_DIRS: frozenset[str] = frozenset({"contract", "e2e", "support", "template", "eta"})
+SHARED_DIRS: frozenset[str] = frozenset({"contract", "e2e", "support", "eta", "repo"})
 
 #: Раскладка «по уровню» вместо «по модулю» — запрещена.
 LEVEL_DIRS: frozenset[str] = frozenset({"unit", "integration"})
-
-pytestmark = pytest.mark.template
 
 
 def directories(path: Path) -> set[str]:

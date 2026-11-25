@@ -266,9 +266,9 @@ Event bus — только когда без него нельзя».
    resolver, связь через `psi.contracts`. Меняется содержимое `beta/`,
    не правила.
 3. `psi.bootstrap` собирает то, что есть. Если scaffold удалён —
-   `build_application()` переписывается под домен, шаблонные тесты
-   `test_bootstrap_*` обновляются или удаляются (они помечены
-   `pytest.mark.template`).
+   `build_application()` переписывается под домен, тесты scaffold
+   (`tau/psi/test_application.py`, `tau/psi/test_smoke.py`) обновляются
+   или удаляются. Уровня `template` в проекте больше нет.
 
 **Что остаётся обязательным:** `alpha/` как алфавит типов, `delta/`
 как адаптеры, `gamma/` как представление, `sigma/` как логирование,
@@ -365,21 +365,21 @@ Zeta — модуль для экспериментов и легаси.
     tau/<module>/test_<что>.py
 
 Каталоги без модуля-владельца (легальные, фиксированы в
-`tau/template/test_layout.py`):
+`tau/repo/test_layout.py`):
 
-- `tau/template/` — инварианты шаблона, сносятся через `make strip-template`;
+- `tau/repo/` — инварианты репозитория: раскладка тестов, структура модулей;
 - `tau/eta/` — тесты на `eta/`;
 - `tau/contract/` — контрактные наборы, параметризуются по реализации;
 - `tau/e2e/` — сквозные сценарии;
 - `tau/support/` — фикстуры и билдеры, не тесты.
 
 Уровни: `unit` (по умолчанию), `integration` (файл выставляет
-`pytestmark = pytest.mark.integration`), `contract`, `e2e`, `template`.
+`pytestmark = pytest.mark.integration`), `contract`, `e2e`.
 Авто-маркировка по каталогу — в `tau/conftest.py`.
 
 `tau/unit/` и `tau/integration/` запрещены: при двух осях один и тот же
 тест можно положить в два места, и никто не знает, где он должен быть.
-Проверяется машинно — `tau/template/test_layout.py`.
+Проверяется машинно — `tau/repo/test_layout.py`.
 
 Запуск по уровню: `make test-unit`, `make test-integration`,
 `make test-contract`, `make test-e2e`. По модулю:
