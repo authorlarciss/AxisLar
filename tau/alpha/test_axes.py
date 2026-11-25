@@ -36,7 +36,22 @@ def test_target_only_for_reference() -> None:
 def test_strict_only_for_categorical() -> None:
     with pytest.raises(ValidationError, match="strict is only allowed"):
         AxisDefinition(name="year", kind=AxisKind.MEASURABLE, strict=True)
-    assert AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL, strict=True).strict is True
+    axis = AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL, strict=True, values=("noir",))
+    assert axis.strict is True
+    assert axis.values == ("noir",)
+
+
+def test_vocabulary_rules() -> None:
+    """A5: values только у categorical; strict требует непустого словаря."""
+    with pytest.raises(ValidationError, match="values are only allowed"):
+        AxisDefinition(name="year", kind=AxisKind.MEASURABLE, values=("2024",))
+    with pytest.raises(ValidationError, match="requires a non-empty vocabulary"):
+        AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL, strict=True)
+    with pytest.raises(ValidationError, match="duplicate values in vocabulary"):
+        AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL, values=("noir", "noir"))
+    assert AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL, values=("noir",)).values == (
+        "noir",
+    )
 
 
 def test_axis_is_frozen_and_rejects_extra() -> None:

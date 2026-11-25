@@ -231,7 +231,7 @@ forbidden_modules = [
 # Блок генерируется: `make contracts` (eta/sync_contracts.py, ADR-0007).
 ignore_imports = [
     # >>> contracts:generated rule5
-    "nu.beta.public.resolver -> nu.beta._internal.workflow",
+    "nu.beta.public.resolver -> nu.beta._internal.query_resolver",
     "nu.sigma.public.resolver -> nu.sigma._internal.setup",
     # <<< contracts:generated rule5
 ]

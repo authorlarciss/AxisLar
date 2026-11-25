@@ -12,7 +12,6 @@ from nu.alpha.public.entities import Entity as Entity
 from nu.alpha.public.entities import Provenance as Provenance
 from nu.alpha.public.errors import DomainError as DomainError
 from nu.alpha.public.errors import ErrorCode as ErrorCode
-from nu.alpha.public.events import IEvent as IEvent
 from nu.alpha.public.facets import CategoricalValue as CategoricalValue
 from nu.alpha.public.facets import FacetValue as FacetValue
 from nu.alpha.public.facets import MeasurableValue as MeasurableValue
@@ -34,7 +33,6 @@ __all__ = [
     "ErrorCode",
     "FacetValue",
     "Filter",
-    "IEvent",
     "MeasurableValue",
     "Operator",
     "Provenance",

@@ -22,9 +22,10 @@ class AxisKind(StrEnum):
 class AxisDefinition(BaseModel):
     """Именованное измерение схемы.
 
-    Инварианты A1–A3 (DOMAIN §1): имя непустое и уникально в схеме
+    Инварианты A1–A5 (DOMAIN §1): имя непустое и уникально в схеме
     (уникальность проверяет `StorageSchema`), `target` — только у
-    `reference`, `strict` — только у `categorical`.
+    `reference`, `strict` и `values` — только у `categorical`,
+    `strict` требует непустого словаря значений.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -34,6 +35,7 @@ class AxisDefinition(BaseModel):
     multi: bool = False
     target: str | None = None
     strict: bool = False
+    values: tuple[str, ...] = ()
     description: str | None = None
 
     @model_validator(mode="after")
@@ -42,6 +44,12 @@ class AxisDefinition(BaseModel):
             raise ValueError(f"axis {self.name!r}: target is only allowed for reference axes")
         if self.kind is not AxisKind.CATEGORICAL and self.strict:
             raise ValueError(f"axis {self.name!r}: strict is only allowed for categorical axes")
+        if self.kind is not AxisKind.CATEGORICAL and self.values:
+            raise ValueError(f"axis {self.name!r}: values are only allowed for categorical axes")
+        if self.strict and not self.values:
+            raise ValueError(f"axis {self.name!r}: strict axis requires a non-empty vocabulary")
+        if len(set(self.values)) != len(self.values):
+            raise ValueError(f"axis {self.name!r}: duplicate values in vocabulary")
         return self
 
 

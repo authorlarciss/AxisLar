@@ -11,26 +11,26 @@ logger = get_logger(__name__)
 class Application(IApplication):
     """Базовое приложение с DI-контекстом.
 
-    В BaseLar-шаблоне run() — заглушка. В конкретном проекте —
-    наследование и переопределение:
+    В шаблоне run() — заглушка. В проекте — наследование и переопределение:
 
         from nu.psi.application import Application
         from nu.psi.bootstrap import build_application
 
         class MyApp(Application):
             async def run(self) -> None:
-                resolver = self.context.resolve("beta_resolver")
-                workflow = resolver.make_workflow(initial_data=...)
-                await workflow.run([Processor1(), Processor2()])
-                print(f"Result: {workflow.result}")
+                beta = self.context.resolve("beta_resolver")
+                validator = beta.make_query_resolver()
+                errors = await validator.check(query, schema, capabilities)
+                if not errors:
+                    result = await engine.query(query)
 
         app = MyApp(build_application().context)
         asyncio.run(app.run())
 
     Такой подход гарантирует, что:
     - резолвер получен из контекста (не создан напрямую);
-    - реализация workflow скрыта за интерфейсом IWorkflow;
-    - конкретные процессоры — в проекте, не в BaseLar.
+    - реализация скрыта за интерфейсом (IQueryResolver, IStorageEngine);
+    - движок и валидатор собираются в psi, а не в клиенте.
     """
 
     def __init__(self, context: Context) -> None:
@@ -39,7 +39,7 @@ class Application(IApplication):
     async def run(self) -> None:
         """Запуск проекта. В шаблоне — заглушка."""
         logger.info("Application starting, version=%s", __version__)
-        print(f"BaseLar nu v{__version__} — шаблон готов к использованию.")
+        print(f"AxisLar v{__version__} — ядро готово к сборке бэкенда.")
         logger.info("Application finished")
 
 
