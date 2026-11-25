@@ -53,3 +53,7 @@ logs/
 .dsh/
 .claude/
 .agents/
+
+# Деплой-сборка
+.deploy/
+dist/

@@ -1,4 +1,4 @@
-.PHONY: help install install-pip lock lint lint-imports contracts contracts-check strip-template typecheck format format-check check ci test test-unit test-integration test-contract test-e2e test-module run clean
+.PHONY: help install install-pip lock lint lint-imports contracts contracts-check strip-template typecheck format format-check check ci test test-unit test-integration test-contract test-e2e test-module run dist clean
 
 PYTHON := python3
 VENV := .venv
@@ -30,7 +30,8 @@ help:
 	@echo "  make test-e2e      — только маркер e2e"
 	@echo "  make test-module M=beta — тесты одного модуля с его покрытием"
 	@echo "  make strip-template — снести template-обвязку при форке"
-	@echo "  make run           — запуск nu.main"
+	@echo "  make run           — собрать ядро и показать состояние"
+	@echo "  make dist          — собрать дистрибутив с переименованным пакетом"
 	@echo "  make clean         — удалить кэши и venv"
 
 install:
@@ -94,6 +95,17 @@ test-module:
 
 strip-template:
 	$(PY) -m eta.strip_template
+
+# Переименование nu -> DIST_PACKAGE выполняется в копии дерева (.deploy),
+# чтобы рабочее имя пакета оставалось простым.
+DIST_PACKAGE ?= axislar_core
+DIST_DIR ?= .deploy
+
+dist: contracts-check
+	rm -rf $(DIST_DIR) dist
+	$(PY) -m eta.rename_package --to $(DIST_PACKAGE) --from-dir $(DIST_DIR)
+	cd $(DIST_DIR) && uv build --out-dir ../dist
+	@ls -1 dist
 
 run:
 	$(VENV)/bin/python -m nu.main

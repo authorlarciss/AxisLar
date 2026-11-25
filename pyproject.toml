@@ -172,12 +172,12 @@ ignore_imports = [
 unmatched_ignore_imports_alerting = "error"
 
 # ============================================================
-# Правило 5. main.py импортирует только из nu.psi.
+# Правило 5. Точки входа (main, contracts) импортируют только из nu.psi.
 # ============================================================
 [[tool.importlinter.contracts]]
-name = "main.py imports only from nu.psi"
+name = "entry modules import only from nu.psi"
 type = "forbidden"
-source_modules = ["nu.main"]
+source_modules = ["nu.main", "nu.contracts"]
 forbidden_modules = [
     "nu.alpha",
     "nu.beta",
