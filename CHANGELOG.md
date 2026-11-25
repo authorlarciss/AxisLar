@@ -10,18 +10,39 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-11-25
+
+Первый релиз: модель зафиксирована, семантика проверена контрактом.
+
 ### Added
 
-- Самоопределение проекта: `README.md`, `lambda/DOMAIN.md` (нормативная
-  модель), `lambda/PLAN.md` (этапы M0–M5).
-- ADR-0009…ADR-0013: многомерная модель; разреженность и семантика
+- Документы самоопределения: `README.md`, `lambda/DOMAIN.md` (нормативная
+  модель, включая обязательную таблицу семантики отсутствующих значений),
+  `lambda/PLAN.md` (этапы M0–M6).
+- ADR-0009…ADR-0014: многомерная модель; разреженность и семантика
   отсутствующих значений; reference-фасеты вместо relations; модель
-  запросов (`none_of` вместо `!=`); in-memory backend как референс.
+  запросов (`none_of` вместо `!=`); in-memory backend как референс;
+  удаление pipeline-scaffold.
+- `alpha`: DTO модели — `AxisDefinition` (kind/multi/target/strict/values),
+  `ScalarDefinition`, `FacetValue` (discriminated union), `Entity`,
+  `Provenance`, `StorageSchema`, `Query`/`Filter`/`Operator`/`QueryResult`,
+  `DomainError`/`ErrorCode`.
+- `beta`: `IStorageEngine`, `IQueryResolver`, `Capability`,
+  чистые функции `validate_axis`/`validate_scalar`/`validate_entity`/
+  `validate_query`, `StorageQueryError`, `BetaResolver`.
+- `delta`: `MemoryStorage` — эталонный бэкенд (разреженность, динамические
+  оси, мультизначность, ссылки, пагинация), снимок состояния в JSON,
+  `DeltaResolver`.
+- `gamma`: CLI (`axislar`) — `schema add-axis|add-scalar|show`, `put`,
+  `show`, `query`; консольный скрипт в `pyproject.toml`.
+- `tau/contract`: контрактный набор бэкендов, параметризованный по
+  фабрике; каждая строка таблицы DOMAIN §5 — отдельный кейс.
 
 ### Changed
 
+- Проект переименован из шаблонного `baselar` в `axislar`; единственная
+  зависимость ядра — pydantic 2.
 - Template-обвязка снята: `tau/template/` удалён, маркер `template`
-  убран из `pyproject.toml`; инварианты репозитория перенесены в
-  `tau/repo/` (раскладка тестов, структура модулей).
-- `tau/conftest.py`: уровни — `unit` (по умолчанию), `integration`,
-  `contract`, `e2e`.
+  убран; инварианты репозитория перенесены в `tau/repo/`.
+- Pipeline-scaffold (`IProcessor`, `IWorkflow`, `IEventBus`, `IEvent`)
+  удалён: домен не пайплайн (ADR-0014).
