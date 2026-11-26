@@ -9,12 +9,15 @@ from nu.alpha.public import AxisDefinition as AxisDefinition
 from nu.alpha.public import AxisKind as AxisKind
 from nu.alpha.public import Capability as Capability
 from nu.alpha.public import CategoricalValue as CategoricalValue
+from nu.alpha.public import ClientProfile as ClientProfile
 from nu.alpha.public import DomainError as DomainError
 from nu.alpha.public import Entity as Entity
 from nu.alpha.public import EntityId as EntityId
 from nu.alpha.public import ErrorCode as ErrorCode
 from nu.alpha.public import FacetOwner as FacetOwner
 from nu.alpha.public import FacetValue as FacetValue
+from nu.alpha.public import FeatureManifest as FeatureManifest
+from nu.alpha.public import FeatureVariant as FeatureVariant
 from nu.alpha.public import Filter as Filter
 from nu.alpha.public import MeasurableValue as MeasurableValue
 from nu.alpha.public import Operator as Operator
@@ -35,12 +38,15 @@ __all__ = [
     "AxisKind",
     "Capability",
     "CategoricalValue",
+    "ClientProfile",
     "DomainError",
     "Entity",
     "EntityId",
     "FacetOwner",
     "ErrorCode",
     "FacetValue",
+    "FeatureManifest",
+    "FeatureVariant",
     "Filter",
     "content_hash_of",
     "make_artifact",

@@ -1,5 +1,9 @@
 """Публичный API модуля beta: проверки модели и синхронизация источника."""
 
+from nu.beta.public.features import FeatureResolution as FeatureResolution
+from nu.beta.public.features import fits as fits
+from nu.beta.public.features import resolve_feature as resolve_feature
+from nu.beta.public.features import resolve_features as resolve_features
 from nu.beta.public.sync import ActionKind as ActionKind
 from nu.beta.public.sync import SyncAction as SyncAction
 from nu.beta.public.sync import SyncConflict as SyncConflict
@@ -18,15 +22,19 @@ from nu.beta.public.validation import validate_scalar as validate_scalar
 
 __all__ = [
     "ActionKind",
+    "FeatureResolution",
     "SyncAction",
     "SyncConflict",
     "SyncError",
     "SyncPlan",
     "SyncPolicy",
     "apply_plan",
+    "fits",
     "inherit_derived",
     "merge_entity",
     "plan_sync",
+    "resolve_feature",
+    "resolve_features",
     "validate_artifact",
     "validate_axis",
     "validate_entity",

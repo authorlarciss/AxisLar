@@ -10,6 +10,26 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.10.0] - 2025-11-25
+
+### Added
+
+- **Клиенты, фичи и варианты** (ADR-0020): `ClientProfile(name, features,
+  variants)`, `FeatureVariant(name, clients, fallback)`,
+  `FeatureManifest(provider, feature, variants)`.
+- `resolve_feature` / `resolve_features` (`beta`): детерминированный выбор
+  варианта (провайдеры по имени, варианты — в порядке объявления),
+  fallback-цепочки в пределах манифеста с ограничением глубины и
+  обнаружением циклов, «не разрешилось» — значение с причиной.
+- `fits(profile, variant)`: клиент может сузить выбор своими `variants`,
+  провайдер — ограничить вариант списком `clients`.
+
+### Changed
+
+- Контракт остаётся **5**: порт `IStorageEngine`/`IEntitySource` не
+  менялся, расширение аддитивно.
+- PLAN: M7 отмечен выполненным, ADR-roadmap — 0020 занят.
+
 ## [0.9.1] - 2025-11-25
 
 ### Fixed

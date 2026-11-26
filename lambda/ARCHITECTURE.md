@@ -65,6 +65,7 @@ result = await core.query(query)
 | `IEntitySource` | `delta` | порт источника (`describe`, `scan`) |
 | `StorageQueryError` | `delta` | отказ движка на невалидированном запросе |
 | `plan_sync`/`apply_plan`/`merge_entity`/`inherit_derived` | `beta` | синхронизация: план, слияние по владельцам, reuse по хэшу |
+| `resolve_feature`/`resolve_features`/`fits` | `beta` | выбор варианта фичи для профиля клиента (ADR-0020) |
 | `Core`, `build_core` | `psi` | вход в ядро |
 
 `CONTRACT_VERSION` (в `mu`) — версия этой поверхности. Меняется при

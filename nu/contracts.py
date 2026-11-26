@@ -18,12 +18,15 @@ from nu.psi.contracts.alpha import AxisDefinition as AxisDefinition
 from nu.psi.contracts.alpha import AxisKind as AxisKind
 from nu.psi.contracts.alpha import Capability as Capability
 from nu.psi.contracts.alpha import CategoricalValue as CategoricalValue
+from nu.psi.contracts.alpha import ClientProfile as ClientProfile
 from nu.psi.contracts.alpha import DomainError as DomainError
 from nu.psi.contracts.alpha import Entity as Entity
 from nu.psi.contracts.alpha import EntityId as EntityId
 from nu.psi.contracts.alpha import ErrorCode as ErrorCode
 from nu.psi.contracts.alpha import FacetOwner as FacetOwner
 from nu.psi.contracts.alpha import FacetValue as FacetValue
+from nu.psi.contracts.alpha import FeatureManifest as FeatureManifest
+from nu.psi.contracts.alpha import FeatureVariant as FeatureVariant
 from nu.psi.contracts.alpha import Filter as Filter
 from nu.psi.contracts.alpha import MeasurableValue as MeasurableValue
 from nu.psi.contracts.alpha import Operator as Operator
@@ -37,6 +40,7 @@ from nu.psi.contracts.alpha import StorageSchema as StorageSchema
 from nu.psi.contracts.alpha import content_hash_of as content_hash_of
 from nu.psi.contracts.alpha import make_artifact as make_artifact
 from nu.psi.contracts.beta import ActionKind as ActionKind
+from nu.psi.contracts.beta import FeatureResolution as FeatureResolution
 from nu.psi.contracts.beta import SyncConflict as SyncConflict
 from nu.psi.contracts.beta import SyncPlan as SyncPlan
 from nu.psi.contracts.beta import SyncPolicy as SyncPolicy
@@ -44,6 +48,8 @@ from nu.psi.contracts.beta import apply_plan as apply_plan
 from nu.psi.contracts.beta import inherit_derived as inherit_derived
 from nu.psi.contracts.beta import merge_entity as merge_entity
 from nu.psi.contracts.beta import plan_sync as plan_sync
+from nu.psi.contracts.beta import resolve_feature as resolve_feature
+from nu.psi.contracts.beta import resolve_features as resolve_features
 from nu.psi.contracts.beta import validate_artifact as validate_artifact
 from nu.psi.contracts.beta import validate_axis as validate_axis
 from nu.psi.contracts.beta import validate_entity as validate_entity
@@ -67,6 +73,7 @@ __all__ = [
     "AxisKind",
     "CONTRACT_VERSION",
     "Capability",
+    "ClientProfile",
     "CategoricalValue",
     "Core",
     "DomainError",
@@ -75,6 +82,9 @@ __all__ = [
     "ErrorCode",
     "FacetOwner",
     "FacetValue",
+    "FeatureManifest",
+    "FeatureVariant",
+    "FeatureResolution",
     "Filter",
     "IEntitySource",
     "IStorageEngine",
@@ -103,6 +113,8 @@ __all__ = [
     "make_artifact",
     "merge_entity",
     "plan_sync",
+    "resolve_feature",
+    "resolve_features",
     "validate_artifact",
     "validate_axis",
     "validate_entity",

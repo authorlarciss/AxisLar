@@ -23,6 +23,9 @@ from nu.alpha.public.facets import CategoricalValue as CategoricalValue
 from nu.alpha.public.facets import FacetValue as FacetValue
 from nu.alpha.public.facets import MeasurableValue as MeasurableValue
 from nu.alpha.public.facets import ReferenceValue as ReferenceValue
+from nu.alpha.public.features import ClientProfile as ClientProfile
+from nu.alpha.public.features import FeatureManifest as FeatureManifest
+from nu.alpha.public.features import FeatureVariant as FeatureVariant
 from nu.alpha.public.ids import EntityId as EntityId
 from nu.alpha.public.query import Filter as Filter
 from nu.alpha.public.query import Operator as Operator
@@ -37,12 +40,15 @@ __all__ = [
     "AxisKind",
     "Capability",
     "CategoricalValue",
+    "ClientProfile",
     "DomainError",
     "Entity",
     "EntityId",
     "FacetOwner",
     "ErrorCode",
     "FacetValue",
+    "FeatureManifest",
+    "FeatureVariant",
     "Filter",
     "content_hash_of",
     "make_artifact",
