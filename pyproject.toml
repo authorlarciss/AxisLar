@@ -7,6 +7,8 @@ name = "axislar-core"
 dynamic = ["version"]
 description = "AxisLar core — многомерное ядро: оси, фасеты, объекты (без продукта и плагинов)"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.13,<3.15"
 authors = [
     { name = "authorlarciss", email = "author.larciss@gmail.com" }
@@ -14,6 +16,11 @@ authors = [
 dependencies = [
     "pydantic>=2.14.4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/authorlarciss/AxisLar"
+Source = "https://github.com/authorlarciss/AxisLar"
+Changelog = "https://github.com/authorlarciss/AxisLar/blob/HEAD/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [

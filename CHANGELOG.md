@@ -10,6 +10,15 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-26
+
+### Added
+
+- Лицензия **MIT** (`LICENSE`), поле `license = "MIT"` и `license-files`
+  в метаданных, `[project.urls]`.
+- Репозиторий публикуется в open source: код ядра доступен без
+  ограничений, контракт (5) и API не менялись.
+
 ## [0.10.0] - 2025-11-25
 
 ### Added
