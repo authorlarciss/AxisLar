@@ -23,8 +23,11 @@ from datetime import UTC, datetime
 
 from nu.iota.public.ids import entity_id_for
 from nu.psi.contracts.alpha import (
+    Artifact,
+    ArtifactRef,
     AxisDefinition,
     AxisKind,
+    Capability,
     CategoricalValue,
     Entity,
     EntityId,
@@ -38,6 +41,7 @@ from nu.psi.contracts.alpha import (
     ReferenceValue,
     ScalarDefinition,
     StorageSchema,
+    make_artifact,
 )
 from nu.psi.contracts.beta import validate_entity
 from nu.psi.contracts.delta import IEntitySource, IStorageEngine, StorageQueryError
@@ -103,6 +107,7 @@ async def run_storage_contract(factory: _BACKEND, schema: StorageSchema | None =
     await _check_pagination(engine)
     await _check_rejection(engine)
     await _check_tombstones(engine)
+    await _check_artifacts(engine)
 
 
 async def _check_schema(engine: IStorageEngine, schema: StorageSchema) -> None:
@@ -285,6 +290,72 @@ async def _collect(source: IEntitySource, schema: StorageSchema) -> tuple[Entity
 
         collected.append(entity)
     return tuple(collected)
+
+
+async def _check_artifacts(engine: IStorageEngine) -> None:
+    """Артефакты: адресация по хэшу, дедупликация, ссылки, удаление (ADR-0019)."""
+    artifact = make_artifact(b"contract-preview-bytes", "image/png")
+
+    if Capability.ARTIFACTS not in engine.capabilities():
+        errors = await engine.put_artifact(artifact)
+        assert {error.code for error in errors} == {ErrorCode.UNSUPPORTED_ARTIFACT}, (
+            "backend without ARTIFACTS must reject put_artifact with UNSUPPORTED_ARTIFACT"
+        )
+        assert await engine.get_artifact(artifact.content_hash) is None, (
+            "backend without ARTIFACTS must not return artifacts"
+        )
+        assert await engine.list_artifacts() == (), "backend without ARTIFACTS must list nothing"
+        return
+
+    assert await engine.put_artifact(artifact) == [], "put_artifact must accept a valid artifact"
+    assert await engine.put_artifact(artifact) == [], "put_artifact must be idempotent"
+    assert await engine.list_artifacts() == (
+        ArtifactRef(
+            content_hash=artifact.content_hash,
+            media_type=artifact.media_type,
+            size=artifact.size,
+        ),
+    ), "list_artifacts must report metadata of stored artifacts, deduplicated by hash"
+    assert await engine.get_artifact(artifact.content_hash) == artifact, (
+        "get_artifact must return the stored bytes"
+    )
+
+    same_bytes_other_type = Artifact(
+        content_hash=artifact.content_hash, media_type="image/jpeg", data=artifact.data
+    )
+    mismatch = await engine.put_artifact(same_bytes_other_type)
+    assert {error.code for error in mismatch} == {ErrorCode.ARTIFACT_MISMATCH}, (
+        "same content hash with another media_type must be rejected"
+    )
+
+    reference = ArtifactRef(
+        content_hash=artifact.content_hash,
+        media_type=artifact.media_type,
+        size=artifact.size,
+    )
+    holder = Entity(id=EntityId("art-1"), kind="edit", artifacts={"preview": reference})
+    assert await engine.upsert(holder) == [], "entity may reference a stored artifact"
+
+    in_use = await engine.delete_artifact(artifact.content_hash)
+    assert {error.code for error in in_use} == {ErrorCode.ARTIFACT_IN_USE}, (
+        "artifact referenced by an object must not be deleted"
+    )
+
+    missing = ArtifactRef(content_hash="0" * 64, media_type="image/png", size=1)
+    errors = await engine.upsert(
+        Entity(id=EntityId("art-2"), kind="edit", artifacts={"preview": missing})
+    )
+    assert {error.code for error in errors} == {ErrorCode.DANGLING_ARTIFACT}, (
+        "reference to a missing artifact must be rejected"
+    )
+
+    assert await engine.upsert(holder.model_copy(update={"artifacts": {}})) == [], (
+        "dropping the reference must succeed"
+    )
+    assert await engine.delete_artifact(artifact.content_hash) == [], (
+        "unreferenced artifact must be deletable"
+    )
+    assert await engine.get_artifact(artifact.content_hash) is None, "deleted artifact must be gone"
 
 
 async def _check_tombstones(engine: IStorageEngine) -> None:

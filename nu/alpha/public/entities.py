@@ -62,6 +62,22 @@ class Provenance(BaseModel):
         return self
 
 
+class ArtifactRef(BaseModel):
+    """Ссылка объекта на артефакт: адрес, метаданные и provenance.
+
+    Ссылка, а не байты: объект остаётся лёгким, байты живут отдельно и
+    делятся между объектами с тем же содержимым (ADR-0019). `derived_by`
+    есть только у артефактов анализа — у пользовательских его нет.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    content_hash: str = Field(min_length=1)
+    media_type: str = Field(min_length=1)
+    size: int = Field(ge=0)
+    derived_by: Provenance | None = None
+
+
 class Entity(BaseModel):
     """Универсальная единица данных: скаляры + разреженные фасеты.
 
@@ -78,6 +94,7 @@ class Entity(BaseModel):
     facets: dict[str, tuple[FacetValue, ...]] = {}
     owners: dict[str, FacetOwner] = {}
     derived_by: dict[str, Provenance] = {}
+    artifacts: dict[str, ArtifactRef] = {}
     origin: Origin | None = None
     deleted_at: datetime | None = None
 
@@ -96,7 +113,11 @@ class Entity(BaseModel):
         unknown = sorted(set(self.derived_by) - set(self.facets))
         if unknown:
             raise ValueError(f"entity {self.id!r}: provenance refers to missing facets {unknown}")
+
+        empty_roles = sorted(role for role in self.artifacts if not role.strip())
+        if empty_roles:
+            raise ValueError(f"entity {self.id!r}: artifact role must be non-empty")
         return self
 
 
-__all__ = ["Entity", "FacetOwner", "Origin", "Provenance"]
+__all__ = ["ArtifactRef", "Entity", "FacetOwner", "Origin", "Provenance"]

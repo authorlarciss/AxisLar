@@ -26,6 +26,7 @@ class Capability(StrEnum):
     REFERENCE_CHECK = "reference_check"
     WRITE_BULK = "write_bulk"
     DYNAMIC_AXES = "dynamic_axes"
+    ARTIFACTS = "artifacts"
 
 
 __all__ = ["Capability"]

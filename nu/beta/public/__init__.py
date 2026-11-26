@@ -10,6 +10,7 @@ from nu.beta.public.sync import apply_plan as apply_plan
 from nu.beta.public.sync import inherit_derived as inherit_derived
 from nu.beta.public.sync import merge_entity as merge_entity
 from nu.beta.public.sync import plan_sync as plan_sync
+from nu.beta.public.validation import validate_artifact as validate_artifact
 from nu.beta.public.validation import validate_axis as validate_axis
 from nu.beta.public.validation import validate_entity as validate_entity
 from nu.beta.public.validation import validate_query as validate_query
@@ -26,6 +27,7 @@ __all__ = [
     "inherit_derived",
     "merge_entity",
     "plan_sync",
+    "validate_artifact",
     "validate_axis",
     "validate_entity",
     "validate_query",

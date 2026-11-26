@@ -15,6 +15,7 @@ from __future__ import annotations
 from collections.abc import Collection
 
 from nu.psi.contracts.alpha import (
+    Artifact,
     AxisDefinition,
     AxisKind,
     Capability,
@@ -106,14 +107,19 @@ def validate_entity(
     entity: Entity,
     *,
     known_ids: Collection[EntityId] | None = None,
+    known_artifacts: Collection[str] | None = None,
     capabilities: frozenset[Capability] = frozenset(),
 ) -> list[DomainError]:
-    """Проверить объект против схемы (E2–E6).
+    """Проверить объект против схемы (E2–E6, E7).
 
     `known_ids=None` означает «проверку ссылок не выполнять»; иначе
     ссылка на отсутствующий объект даёт `DanglingReference` — но только
     если бэкенд объявил `Capability.REFERENCE_CHECK` (иначе проверка
     невозможна, и это не ошибка объекта).
+
+    `known_artifacts` работает так же для `Entity.artifacts`: адрес,
+    которого нет в хранилище, даёт `DanglingArtifact`, если бэкенд умеет
+    артефакты (`Capability.ARTIFACTS`).
     """
     errors: list[DomainError] = []
 
@@ -129,6 +135,7 @@ def validate_entity(
             )
 
     check_references = known_ids is not None and (Capability.REFERENCE_CHECK in capabilities)
+    check_artifacts = known_artifacts is not None and Capability.ARTIFACTS in capabilities
 
     for axis_name, values in entity.facets.items():
         axis = schema.axis(axis_name)
@@ -194,7 +201,39 @@ def validate_entity(
                     )
                 )
 
+    if check_artifacts and known_artifacts is not None:
+        for role, reference in entity.artifacts.items():
+            if reference.content_hash not in known_artifacts:
+                errors.append(
+                    DomainError(
+                        code=ErrorCode.DANGLING_ARTIFACT,
+                        detail=(f"artifact {role!r} is not stored: {reference.content_hash!r}"),
+                        entity_id=entity.id,
+                    )
+                )
+
     return errors
+
+
+def validate_artifact(
+    artifact: Artifact,
+    capabilities: frozenset[Capability] = frozenset(),
+) -> list[DomainError]:
+    """Проверить, что бэкенд умеет хранить артефакты.
+
+    Сам артефакт уже проверен DTO (хэш соответствует данным); здесь —
+    только совместимость с возможностями хранилища. Молчаливая запись в
+    бэкенд без `Capability.ARTIFACTS` запрещена: иначе артефакт «есть» у
+    клиента и «нет» в хранилище.
+    """
+    if Capability.ARTIFACTS not in capabilities:
+        return [
+            DomainError(
+                code=ErrorCode.UNSUPPORTED_ARTIFACT,
+                detail="backend does not support artifacts",
+            )
+        ]
+    return []
 
 
 def validate_query(

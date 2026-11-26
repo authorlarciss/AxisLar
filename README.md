@@ -53,9 +53,9 @@ AxisLar — абстрактное ядро для многомерных дан
 
 | Модуль | Роль в ядре |
 |--------|--------------|
-| `alpha` | DTO и словарь домена: `Entity`, `AxisDefinition`, `FacetValue`, `StorageSchema`, `Query`, `QueryResult`, `Capability`, `DomainError` |
+| `alpha` | DTO и словарь домена: `Entity`, `AxisDefinition`, `FacetValue`, `StorageSchema`, `Query`, `QueryResult`, `Artifact`, `Capability`, `DomainError` |
 | `beta` | Доменные правила: `validate_axis/scalar/entity/query` (чистые функции) |
-| `delta` | Хранилище: порт `IStorageEngine`, эталонный `MemoryStorage`, ошибки исполнения |
+| `delta` | Хранилище: порт `IStorageEngine` (объекты + артефакты), эталонный `MemoryStorage`, ошибки исполнения |
 | `iota` | Контрактные наборы для внешних адаптеров (`run_storage_contract`, `run_source_contract`) |
 | `sigma` | Логирование |
 | `mu` | Версии: `__version__`, `CONTRACT_VERSION` |
@@ -104,7 +104,7 @@ v0.7.x (Hellenic Architecture). Предыдущий проект VaultLar ос�
 wheel он переименован в `axislar_core`:
 
 ```bash
-pip install axislar_core-0.8.0-py3-none-any.whl
+pip install axislar_core-0.9.0-py3-none-any.whl
 ```
 
 `pip install git+...@vX.Y.Z` не поддерживается: поставит пакет `nu` и
@@ -113,9 +113,10 @@ pip install axislar_core-0.8.0-py3-none-any.whl
 
 ## Статус
 
-`0.8.0` — ядро. Модель и проверки, порт хранилища (tombstone-семантика),
-порт источника, семантика синхронизации (`plan_sync`: create/update/move/
-tombstone/resurrect), провенанс фасетов, переиспользование производных
-фактов по `content_hash`, два контрактных набора (`run_storage_contract`,
-`run_source_sync_contract`), деплой-переименование пакета.
+`0.9.0` (контракт 5) — ядро. Модель и проверки, порт хранилища
+(tombstone-семантика, артефакты по хэшу), порт источника, семантика
+синхронизации (`plan_sync`: create/update/move/tombstone/resurrect),
+провенанс фасетов, переиспользование производных фактов по `content_hash`,
+два контрактных набора (`run_storage_contract`, `run_source_sync_contract`),
+деплой-переименование пакета.
 Продукт (AgoraLar) и плагины — отдельные проекты, см. `lambda/PLAN.md`.

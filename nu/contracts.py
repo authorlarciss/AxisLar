@@ -12,6 +12,8 @@
 
 from nu.psi import Core as Core
 from nu.psi import build_core as build_core
+from nu.psi.contracts.alpha import Artifact as Artifact
+from nu.psi.contracts.alpha import ArtifactRef as ArtifactRef
 from nu.psi.contracts.alpha import AxisDefinition as AxisDefinition
 from nu.psi.contracts.alpha import AxisKind as AxisKind
 from nu.psi.contracts.alpha import Capability as Capability
@@ -32,6 +34,8 @@ from nu.psi.contracts.alpha import QueryResult as QueryResult
 from nu.psi.contracts.alpha import ReferenceValue as ReferenceValue
 from nu.psi.contracts.alpha import ScalarDefinition as ScalarDefinition
 from nu.psi.contracts.alpha import StorageSchema as StorageSchema
+from nu.psi.contracts.alpha import content_hash_of as content_hash_of
+from nu.psi.contracts.alpha import make_artifact as make_artifact
 from nu.psi.contracts.beta import ActionKind as ActionKind
 from nu.psi.contracts.beta import SyncConflict as SyncConflict
 from nu.psi.contracts.beta import SyncPlan as SyncPlan
@@ -40,6 +44,7 @@ from nu.psi.contracts.beta import apply_plan as apply_plan
 from nu.psi.contracts.beta import inherit_derived as inherit_derived
 from nu.psi.contracts.beta import merge_entity as merge_entity
 from nu.psi.contracts.beta import plan_sync as plan_sync
+from nu.psi.contracts.beta import validate_artifact as validate_artifact
 from nu.psi.contracts.beta import validate_axis as validate_axis
 from nu.psi.contracts.beta import validate_entity as validate_entity
 from nu.psi.contracts.beta import validate_query as validate_query
@@ -56,6 +61,8 @@ from nu.psi.contracts.mu import __version__ as __version__
 
 __all__ = [
     "ActionKind",
+    "Artifact",
+    "ArtifactRef",
     "AxisDefinition",
     "AxisKind",
     "CONTRACT_VERSION",
@@ -92,8 +99,11 @@ __all__ = [
     "run_source_sync_contract",
     "run_storage_contract",
     "inherit_derived",
+    "content_hash_of",
+    "make_artifact",
     "merge_entity",
     "plan_sync",
+    "validate_artifact",
     "validate_axis",
     "validate_entity",
     "validate_query",

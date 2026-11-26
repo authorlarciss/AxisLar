@@ -51,6 +51,7 @@
 core = build_core()  # или build_core(storage=plugin_backend)
 await core.add_axis(axis)
 await core.upsert(entity)
+await core.put_artifact(make_artifact(b"...", "image/png"))
 result = await core.query(query)
 ```
 
@@ -60,7 +61,7 @@ result = await core.query(query)
 |----------|-----|------------|
 | DTO модели | `alpha` | язык обмена: продукт, плагины, клиенты |
 | `validate_*` | `beta` | проверки без исполнения, ошибки — значениями |
-| `IStorageEngine` | `delta` | порт для бэкендов-плагинов (tombstone-семантика: `list_entities(include_deleted)`) |
+| `IStorageEngine` | `delta` | порт для бэкендов-плагинов: объекты (tombstone: `list_entities(include_deleted)`) и артефакты (`put/get/list/delete_artifact`) |
 | `IEntitySource` | `delta` | порт источника (`describe`, `scan`) |
 | `StorageQueryError` | `delta` | отказ движка на невалидированном запросе |
 | `plan_sync`/`apply_plan`/`merge_entity`/`inherit_derived` | `beta` | синхронизация: план, слияние по владельцам, reuse по хэшу |

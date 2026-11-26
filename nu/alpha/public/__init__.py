@@ -5,10 +5,14 @@
 `iota`.
 """
 
+from nu.alpha.public.artifacts import Artifact as Artifact
+from nu.alpha.public.artifacts import content_hash_of as content_hash_of
+from nu.alpha.public.artifacts import make_artifact as make_artifact
 from nu.alpha.public.axes import AxisDefinition as AxisDefinition
 from nu.alpha.public.axes import AxisKind as AxisKind
 from nu.alpha.public.axes import ScalarDefinition as ScalarDefinition
 from nu.alpha.public.capabilities import Capability as Capability
+from nu.alpha.public.entities import ArtifactRef as ArtifactRef
 from nu.alpha.public.entities import Entity as Entity
 from nu.alpha.public.entities import FacetOwner as FacetOwner
 from nu.alpha.public.entities import Origin as Origin
@@ -27,6 +31,8 @@ from nu.alpha.public.query import QueryResult as QueryResult
 from nu.alpha.public.schema import StorageSchema as StorageSchema
 
 __all__ = [
+    "Artifact",
+    "ArtifactRef",
     "AxisDefinition",
     "AxisKind",
     "Capability",
@@ -38,6 +44,8 @@ __all__ = [
     "ErrorCode",
     "FacetValue",
     "Filter",
+    "content_hash_of",
+    "make_artifact",
     "MeasurableValue",
     "Operator",
     "Origin",

@@ -24,6 +24,10 @@ class ErrorCode(StrEnum):
     UNSUPPORTED_QUERY = "unsupported_query"
     DUPLICATE_AXIS = "duplicate_axis"
     DUPLICATE_SCALAR = "duplicate_scalar"
+    UNSUPPORTED_ARTIFACT = "unsupported_artifact"
+    DANGLING_ARTIFACT = "dangling_artifact"
+    ARTIFACT_MISMATCH = "artifact_mismatch"
+    ARTIFACT_IN_USE = "artifact_in_use"
 
 
 @dataclass(frozen=True, slots=True)

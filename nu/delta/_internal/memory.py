@@ -11,12 +11,15 @@ from collections.abc import Sequence
 from nu.delta.public.errors import StorageQueryError
 from nu.delta.public.interfaces import IStorageEngine
 from nu.psi.contracts.alpha import (
+    Artifact,
+    ArtifactRef,
     AxisDefinition,
     AxisKind,
     Capability,
     DomainError,
     Entity,
     EntityId,
+    ErrorCode,
     Filter,
     MeasurableValue,
     Operator,
@@ -27,6 +30,7 @@ from nu.psi.contracts.alpha import (
     StorageSchema,
 )
 from nu.psi.contracts.beta import (
+    validate_artifact,
     validate_axis,
     validate_entity,
     validate_query,
@@ -43,6 +47,7 @@ MEMORY_CAPABILITIES: frozenset[Capability] = frozenset(
         Capability.REFERENCE_CHECK,
         Capability.WRITE_BULK,
         Capability.DYNAMIC_AXES,
+        Capability.ARTIFACTS,
     }
 )
 
@@ -58,6 +63,7 @@ class MemoryStorage(IStorageEngine):
     def __init__(self, schema: StorageSchema | None = None) -> None:
         self._schema = schema or StorageSchema()
         self._entities: dict[EntityId, Entity] = {}
+        self._artifacts: dict[str, Artifact] = {}
 
     # ---------------------------------------------------------------- схема
 
@@ -83,6 +89,7 @@ class MemoryStorage(IStorageEngine):
             self._schema,
             entity,
             known_ids={*self._entities, entity.id},
+            known_artifacts={*self._artifacts},
             capabilities=self.capabilities(),
         )
         if not errors:
@@ -105,6 +112,7 @@ class MemoryStorage(IStorageEngine):
                 self._schema,
                 entity,
                 known_ids=known_ids,
+                known_artifacts={*self._artifacts},
                 capabilities=self.capabilities(),
             )
             if found:
@@ -157,6 +165,60 @@ class MemoryStorage(IStorageEngine):
         if query.limit is not None:
             window = window[: query.limit]
         return QueryResult(ids=tuple(window), total=total, limit=query.limit, offset=query.offset)
+
+    # ------------------------------------------------------------ артефакты
+
+    async def put_artifact(self, artifact: Artifact) -> list[DomainError]:
+        errors = validate_artifact(artifact, self.capabilities())
+        if errors:
+            return errors
+
+        stored = self._artifacts.get(artifact.content_hash)
+        if stored is not None and stored.media_type != artifact.media_type:
+            return [
+                DomainError(
+                    code=ErrorCode.ARTIFACT_MISMATCH,
+                    detail=(
+                        f"artifact {artifact.content_hash!r} is already stored as "
+                        f"{stored.media_type!r}, not {artifact.media_type!r}"
+                    ),
+                )
+            ]
+        self._artifacts[artifact.content_hash] = artifact
+        return []
+
+    async def get_artifact(self, content_hash: str) -> Artifact | None:
+        return self._artifacts.get(content_hash)
+
+    async def list_artifacts(self) -> tuple[ArtifactRef, ...]:
+        return tuple(
+            ArtifactRef(
+                content_hash=artifact.content_hash,
+                media_type=artifact.media_type,
+                size=artifact.size,
+            )
+            for _, artifact in sorted(self._artifacts.items())
+        )
+
+    async def delete_artifact(self, content_hash: str) -> list[DomainError]:
+        users = sorted(
+            str(entity.id)
+            for entity in self._entities.values()
+            if content_hash in {ref.content_hash for ref in entity.artifacts.values()}
+        )
+        if users:
+            return [
+                DomainError(
+                    code=ErrorCode.ARTIFACT_IN_USE,
+                    detail=(
+                        f"artifact {content_hash!r} is referenced by "
+                        f"{', '.join(users)}; remove the references first"
+                    ),
+                    entity_id=EntityId(users[0]),
+                )
+            ]
+        self._artifacts.pop(content_hash, None)
+        return []
 
     def capabilities(self) -> frozenset[Capability]:
         return MEMORY_CAPABILITIES

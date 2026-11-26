@@ -10,6 +10,36 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-11-25
+
+### Added
+
+- **Артефакты** (ADR-0019, контракт **5**): `Artifact(content_hash,
+  media_type, data)` и `ArtifactRef(content_hash, media_type, size,
+  derived_by)`, поле `Entity.artifacts` (роль → ссылка). Адрес — sha256
+  содержимого, дедупликация свойство модели: две копии одного файла
+  ссылаются на одни байты.
+- Порт `IStorageEngine`: `put_artifact`, `get_artifact`, `list_artifacts`,
+  `delete_artifact`; `Capability.ARTIFACTS`. Бэкенд без возможности
+  обязан отказать (`UnsupportedArtifact`), а не отдать пустоту.
+- Ошибки: `UnsupportedArtifact`, `DanglingArtifact`, `ArtifactMismatch`,
+  `ArtifactInUse`. Ссылка на отсутствующий артефакт проверяется только
+  при объявленной возможности (как `DanglingReference`).
+- `beta`: `validate_artifact`, `validate_entity(known_artifacts=...)`.
+- `iota`: контрактный набор проверяет дедупликацию, метаданные, конфликт
+  `media_type`, ссылку, занятость и удаление, а также корректный отказ
+  бэкенда без артефактов.
+- `Core`: делегаты `put_artifact`/`get_artifact`/`list_artifacts`/
+  `delete_artifact`; `contracts` экспортирует `Artifact`, `ArtifactRef`,
+  `make_artifact`, `content_hash_of`, `validate_artifact`.
+- DOMAIN §3.1: инварианты A6–A10, обновлён список ошибок §7.
+
+### Changed
+
+- **Контракт 5**: плагины и продукт переходят на диапазон `>=5,<6`.
+- PLAN: таблица ADR roadmap приведена к фактическим файлам (нумерация —
+  своя в каждом проекте), M8 отмечен выполненным.
+
 ## [0.8.0] - 2025-11-25
 
 ### Added

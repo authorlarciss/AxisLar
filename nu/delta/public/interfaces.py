@@ -12,6 +12,8 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator, Sequence
 
 from nu.psi.contracts.alpha import (
+    Artifact,
+    ArtifactRef,
     AxisDefinition,
     Capability,
     DomainError,
@@ -78,6 +80,32 @@ class IStorageEngine(ABC):
 
         `include_deleted=True` нужен синхронизации: без tombstone нельзя
         отличить «файл удалён» от «файл вернулся».
+        """
+
+    @abstractmethod
+    async def put_artifact(self, artifact: Artifact) -> list[DomainError]:
+        """Положить артефакт по адресу (idempotent, дедупликация по хэшу).
+
+        Повторная запись тех же байтов — успех без второй копии. Тот же
+        адрес с другим `media_type` — `ArtifactMismatch`: два разных
+        описания одних байтов хранилище не разгадывает.
+        """
+
+    @abstractmethod
+    async def get_artifact(self, content_hash: str) -> Artifact | None:
+        """Артефакт по адресу или `None`."""
+
+    @abstractmethod
+    async def list_artifacts(self) -> tuple[ArtifactRef, ...]:
+        """Метаданные всех артефактов в порядке адреса (без байтов)."""
+
+    @abstractmethod
+    async def delete_artifact(self, content_hash: str) -> list[DomainError]:
+        """Удалить артефакт, на который никто не ссылается.
+
+        Ссылка из любого сохранённого объекта (включая tombstone) даёт
+        `ArtifactInUse`: воскрешение объекта не должно оставлять его без
+        данных.
         """
 
     @abstractmethod

@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from nu.psi.contracts.alpha import (
+    Artifact,
+    ArtifactRef,
     AxisDefinition,
     Capability,
     DomainError,
@@ -50,6 +52,18 @@ class Core:
 
     async def count(self) -> int:
         return await self.storage.count()
+
+    async def put_artifact(self, artifact: Artifact) -> list[DomainError]:
+        return await self.storage.put_artifact(artifact)
+
+    async def get_artifact(self, content_hash: str) -> Artifact | None:
+        return await self.storage.get_artifact(content_hash)
+
+    async def list_artifacts(self) -> tuple[ArtifactRef, ...]:
+        return await self.storage.list_artifacts()
+
+    async def delete_artifact(self, content_hash: str) -> list[DomainError]:
+        return await self.storage.delete_artifact(content_hash)
 
     def capabilities(self) -> frozenset[Capability]:
         return self.storage.capabilities()
