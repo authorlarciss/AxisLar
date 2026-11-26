@@ -10,6 +10,16 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.9.1] - 2025-11-25
+
+### Fixed
+
+- **Бинарные артефакты в JSON**: `Artifact.data` сериализуется base64
+  (url-safe) вместо попытки прочитать байты как UTF-8. Раньше
+  `model_dump_json` падал на любом не-UTF-8 артефакте
+  (`Error serializing to JSON: invalid utf-8 sequence`), а JSON-хранилище
+  продукта не могло сохранить картинку. Контракт не меняется (5).
+
 ## [0.9.0] - 2025-11-25
 
 ### Added

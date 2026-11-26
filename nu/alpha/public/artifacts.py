@@ -32,7 +32,14 @@ class Artifact(BaseModel):
     иначе хранилище могло бы отдать «артефакт» с чужим адресом.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    #: `data` в JSON — base64 (url-safe): байты артефакта не обязаны быть
+    #: UTF-8, и «текстовое» кодирование молча ломалось бы на бинарниках.
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+        ser_json_bytes="base64",
+        val_json_bytes="base64",
+    )
 
     content_hash: str = Field(min_length=1)
     media_type: str = Field(min_length=1)

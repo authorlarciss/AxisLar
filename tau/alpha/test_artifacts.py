@@ -65,3 +65,15 @@ def test_artifact_provenance_is_optional_but_checked() -> None:
     provenance = Provenance(plugin="analyzer", version="1.0", at=datetime(2025, 1, 1, tzinfo=UTC))
     ref = ArtifactRef(content_hash="a" * 64, media_type="image/png", size=1, derived_by=provenance)
     assert ref.derived_by is not None and ref.derived_by.version == "1.0"
+
+
+def test_binary_artifact_survives_json_roundtrip() -> None:
+    """Байты в JSON — base64: артефакт не обязан быть UTF-8."""
+    import base64
+    import json
+
+    artifact = make_artifact(bytes(range(256)), "application/octet-stream")
+    dumped = json.loads(artifact.model_dump_json())
+    decoded = base64.urlsafe_b64decode(dumped["data"])
+    assert decoded == artifact.data, "JSON несёт base64 (url-safe), а не utf8"
+    assert Artifact.model_validate_json(artifact.model_dump_json()) == artifact

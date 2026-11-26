@@ -104,7 +104,7 @@ v0.7.x (Hellenic Architecture). Предыдущий проект VaultLar ос�
 wheel он переименован в `axislar_core`:
 
 ```bash
-pip install axislar_core-0.9.0-py3-none-any.whl
+pip install axislar_core-0.9.1-py3-none-any.whl
 ```
 
 `pip install git+...@vX.Y.Z` не поддерживается: поставит пакет `nu` и
@@ -113,7 +113,7 @@ pip install axislar_core-0.9.0-py3-none-any.whl
 
 ## Статус
 
-`0.9.0` (контракт 5) — ядро. Модель и проверки, порт хранилища
+`0.9.1` (контракт 5) — ядро. Модель и проверки, порт хранилища
 (tombstone-семантика, артефакты по хэшу), порт источника, семантика
 синхронизации (`plan_sync`: create/update/move/tombstone/resurrect),
 провенанс фасетов, переиспользование производных фактов по `content_hash`,
