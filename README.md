@@ -104,6 +104,8 @@ v0.7.x (Hellenic Architecture). Предыдущий проект VaultLar ос�
 wheel он переименован в `axislar_core`:
 
 ```bash
+pip install axislar-core     # из PyPI (0.10.1)
+# либо из артефакта релиза:
 pip install axislar_core-0.10.1-py3-none-any.whl
 ```
 
