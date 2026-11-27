@@ -27,6 +27,7 @@ class Capability(StrEnum):
     WRITE_BULK = "write_bulk"
     DYNAMIC_AXES = "dynamic_axes"
     ARTIFACTS = "artifacts"
+    TRAVERSE_REFERENCES = "traverse_references"
 
 
 __all__ = ["Capability"]

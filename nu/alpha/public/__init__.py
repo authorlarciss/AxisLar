@@ -27,6 +27,7 @@ from nu.alpha.public.features import ClientProfile as ClientProfile
 from nu.alpha.public.features import FeatureManifest as FeatureManifest
 from nu.alpha.public.features import FeatureVariant as FeatureVariant
 from nu.alpha.public.ids import EntityId as EntityId
+from nu.alpha.public.links import ReferenceLink as ReferenceLink
 from nu.alpha.public.query import Filter as Filter
 from nu.alpha.public.query import Operator as Operator
 from nu.alpha.public.query import Query as Query
@@ -58,6 +59,7 @@ __all__ = [
     "Provenance",
     "Query",
     "QueryResult",
+    "ReferenceLink",
     "ReferenceValue",
     "ScalarDefinition",
     "StorageSchema",

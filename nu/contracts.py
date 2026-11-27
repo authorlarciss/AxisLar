@@ -34,6 +34,7 @@ from nu.psi.contracts.alpha import Origin as Origin
 from nu.psi.contracts.alpha import Provenance as Provenance
 from nu.psi.contracts.alpha import Query as Query
 from nu.psi.contracts.alpha import QueryResult as QueryResult
+from nu.psi.contracts.alpha import ReferenceLink as ReferenceLink
 from nu.psi.contracts.alpha import ReferenceValue as ReferenceValue
 from nu.psi.contracts.alpha import ScalarDefinition as ScalarDefinition
 from nu.psi.contracts.alpha import StorageSchema as StorageSchema
@@ -56,6 +57,7 @@ from nu.psi.contracts.beta import validate_entity as validate_entity
 from nu.psi.contracts.beta import validate_query as validate_query
 from nu.psi.contracts.beta import validate_scalar as validate_scalar
 from nu.psi.contracts.delta import IEntitySource as IEntitySource
+from nu.psi.contracts.delta import IReferenceIndex as IReferenceIndex
 from nu.psi.contracts.delta import IStorageEngine as IStorageEngine
 from nu.psi.contracts.delta import StorageQueryError as StorageQueryError
 from nu.psi.contracts.iota import entity_id_for as entity_id_for
@@ -87,6 +89,7 @@ __all__ = [
     "FeatureResolution",
     "Filter",
     "IEntitySource",
+    "IReferenceIndex",
     "IStorageEngine",
     "MeasurableValue",
     "Operator",
@@ -94,6 +97,7 @@ __all__ = [
     "Provenance",
     "Query",
     "QueryResult",
+    "ReferenceLink",
     "ReferenceValue",
     "ScalarDefinition",
     "StorageQueryError",

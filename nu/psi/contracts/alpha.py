@@ -25,6 +25,7 @@ from nu.alpha.public import Origin as Origin
 from nu.alpha.public import Provenance as Provenance
 from nu.alpha.public import Query as Query
 from nu.alpha.public import QueryResult as QueryResult
+from nu.alpha.public import ReferenceLink as ReferenceLink
 from nu.alpha.public import ReferenceValue as ReferenceValue
 from nu.alpha.public import ScalarDefinition as ScalarDefinition
 from nu.alpha.public import StorageSchema as StorageSchema
@@ -56,6 +57,7 @@ __all__ = [
     "Provenance",
     "Query",
     "QueryResult",
+    "ReferenceLink",
     "ReferenceValue",
     "ScalarDefinition",
     "StorageSchema",

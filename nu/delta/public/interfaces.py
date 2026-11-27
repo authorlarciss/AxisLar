@@ -21,6 +21,7 @@ from nu.psi.contracts.alpha import (
     EntityId,
     Query,
     QueryResult,
+    ReferenceLink,
     ScalarDefinition,
     StorageSchema,
 )
@@ -113,6 +114,36 @@ class IStorageEngine(ABC):
         """Возможности бэкенда (синхронно: это статическое свойство)."""
 
 
+class IReferenceIndex(ABC):
+    """Обратный индекс ссылок: кто указывает на объект (ADR-0021).
+
+    Отдельный порт, а не метод `IStorageEngine`, по той же причине, что и
+    `IEntitySource`: это другая роль, а не другая реализация хранения.
+    Бэкенд может хранить объекты, но не уметь обход ссылок — тогда он не
+    реализует этот порт и не объявляет `Capability.TRAVERSE_REFERENCES`.
+
+    Отношений как сущности в модели нет: обход — это проекция
+    reference-фасетов, а не второй вид данных.
+    """
+
+    @abstractmethod
+    async def references_to(
+        self,
+        entity_id: EntityId,
+        axes: Sequence[str] | None = None,
+        *,
+        include_deleted: bool = False,
+    ) -> tuple[ReferenceLink, ...]:
+        """Входящие ссылки на объект: `(ось, объект-источник)`.
+
+        `axes=None` — по всем осям; пустая последовательность — ни по одной
+        (пустой результат, а не «все»: явное «никаких» не должно совпадать
+        с «не указано»). Ссылки из объектов-tombstone по умолчанию не
+        отдаются; `include_deleted=True` возвращает их тоже. Порядок
+        детерминирован: по оси, затем по `id` источника.
+        """
+
+
 class IEntitySource(ABC):
     """Источник объектов: внешние данные, приведённые к модели ядра.
 
@@ -134,4 +165,4 @@ class IEntitySource(ABC):
         """Отдать объекты источника. Повторный вызов даёт тот же набор `id`."""
 
 
-__all__ = ["IEntitySource", "IStorageEngine"]
+__all__ = ["IEntitySource", "IReferenceIndex", "IStorageEngine"]

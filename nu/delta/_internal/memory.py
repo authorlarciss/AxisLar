@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from nu.delta.public.errors import StorageQueryError
-from nu.delta.public.interfaces import IStorageEngine
+from nu.delta.public.interfaces import IReferenceIndex, IStorageEngine
 from nu.psi.contracts.alpha import (
     Artifact,
     ArtifactRef,
@@ -25,6 +25,7 @@ from nu.psi.contracts.alpha import (
     Operator,
     Query,
     QueryResult,
+    ReferenceLink,
     ReferenceValue,
     ScalarDefinition,
     StorageSchema,
@@ -48,11 +49,12 @@ MEMORY_CAPABILITIES: frozenset[Capability] = frozenset(
         Capability.WRITE_BULK,
         Capability.DYNAMIC_AXES,
         Capability.ARTIFACTS,
+        Capability.TRAVERSE_REFERENCES,
     }
 )
 
 
-class MemoryStorage(IStorageEngine):
+class MemoryStorage(IStorageEngine, IReferenceIndex):
     """Хранилище в оперативной памяти.
 
     Разреженность честная: отсутствующая ось не материализуется ни во что
@@ -64,6 +66,8 @@ class MemoryStorage(IStorageEngine):
         self._schema = schema or StorageSchema()
         self._entities: dict[EntityId, Entity] = {}
         self._artifacts: dict[str, Artifact] = {}
+        #: Обратный индекс: цель -> ось -> источники (ADR-0021).
+        self._incoming: dict[EntityId, dict[str, set[EntityId]]] = {}
 
     # ---------------------------------------------------------------- схема
 
@@ -93,7 +97,7 @@ class MemoryStorage(IStorageEngine):
             capabilities=self.capabilities(),
         )
         if not errors:
-            self._entities[entity.id] = entity
+            self._index(previous=self._entities.get(entity.id), current=entity)
         return errors
 
     async def bulk_upsert(self, entities: Sequence[Entity]) -> list[DomainError]:
@@ -120,8 +124,60 @@ class MemoryStorage(IStorageEngine):
             else:
                 accepted.append(entity)
         for entity in accepted:
-            self._entities[entity.id] = entity
+            self._index(previous=self._entities.get(entity.id), current=entity)
         return errors
+
+    # ------------------------------------------------------ обратные ссылки
+
+    def _index(self, previous: Entity | None, current: Entity) -> None:
+        """Заменить вклад объекта в обратный индекс (ADR-0021).
+
+        Индекс строится по всем ссылкам, включая tombstone: видимость
+        решается на чтении, иначе воскрешение объекта требовало бы
+        переиндексации.
+        """
+        if previous is not None:
+            self._unindex(previous)
+        self._entities[current.id] = current
+        for axis, values in current.facets.items():
+            for value in values:
+                if isinstance(value, ReferenceValue):
+                    self._incoming.setdefault(value.target, {}).setdefault(axis, set()).add(
+                        current.id
+                    )
+
+    def _unindex(self, entity: Entity) -> None:
+        for axis, values in entity.facets.items():
+            for value in values:
+                if not isinstance(value, ReferenceValue):
+                    continue
+                by_axis = self._incoming.get(value.target)
+                if by_axis is None:
+                    continue
+                sources = by_axis.get(axis)
+                if sources is None:
+                    continue
+                sources.discard(entity.id)
+                if not sources:
+                    del by_axis[axis]
+                if not by_axis:
+                    del self._incoming[value.target]
+
+    async def references_to(
+        self,
+        entity_id: EntityId,
+        axes: Sequence[str] | None = None,
+        *,
+        include_deleted: bool = False,
+    ) -> tuple[ReferenceLink, ...]:
+        by_axis = self._incoming.get(entity_id, {})
+        wanted = sorted(by_axis) if axes is None else sorted({*axes} & {*by_axis})
+        links: list[ReferenceLink] = []
+        for axis in wanted:
+            for source in sorted(by_axis[axis]):
+                if include_deleted or _visible(self._entities.get(source)):
+                    links.append(ReferenceLink(axis=axis, entity_id=source))
+        return tuple(links)
 
     # --------------------------------------------------------------- чтение
 

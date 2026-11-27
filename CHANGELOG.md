@@ -10,6 +10,20 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-27
+
+### Added
+
+- **Обратные ссылки** (ADR-0021): DTO `ReferenceLink(axis, entity_id)`,
+  порт `IReferenceIndex.references_to(entity_id, axes, include_deleted)`
+  и возможность `Capability.TRAVERSE_REFERENCES`. Эталонный
+  `MemoryStorage` ведёт обратный индекс «цель → ось → источники» и
+  обновляет его в `upsert`/`bulk_upsert`, поэтому обход не пересчитывается
+  на чтении. Изменение аддитивное: `IStorageEngine` не тронут, контракт
+  остаётся 5, плагины без поддержки порта просто не объявляют
+  возможность.
+- `lambda/DOMAIN.md` §3.2 — нормативные инварианты R1–R6 обратных ссылок.
+
 ## [0.10.1] - 2026-11-26
 
 ### Added
