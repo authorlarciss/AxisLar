@@ -104,28 +104,28 @@ class MemoryStorage(IStorageEngine, IReferenceIndex):
         """Записать пачку: ссылки могут указывать на любой объект пачки.
 
         Проверка ссылок идёт по множеству «уже сохранённые + все `id` из
-        пачки», поэтому порядок объектов в пачке не важен. Гарантия
-        существования цели действует после успешной записи пачки.
+        пачки», поэтому порядок объектов в пачке не важен. Пачка атомарна:
+        при любой ошибке не пишется ничего — иначе ссылка на отвергнутый
+        объект пачки стала бы висячей.
         """
         batch_ids = {entity.id for entity in entities}
         known_ids = {*self._entities, *batch_ids}
         errors: list[DomainError] = []
-        accepted: list[Entity] = []
         for entity in entities:
-            found = validate_entity(
-                self._schema,
-                entity,
-                known_ids=known_ids,
-                known_artifacts={*self._artifacts},
-                capabilities=self.capabilities(),
+            errors.extend(
+                validate_entity(
+                    self._schema,
+                    entity,
+                    known_ids=known_ids,
+                    known_artifacts={*self._artifacts},
+                    capabilities=self.capabilities(),
+                )
             )
-            if found:
-                errors.extend(found)
-            else:
-                accepted.append(entity)
-        for entity in accepted:
+        if errors:
+            return errors
+        for entity in entities:
             self._index(previous=self._entities.get(entity.id), current=entity)
-        return errors
+        return []
 
     # ------------------------------------------------------ обратные ссылки
 

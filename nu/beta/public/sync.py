@@ -300,14 +300,23 @@ def merge_entity(scanned: Entity, existing: Entity) -> Entity:
 
 
 async def apply_plan(engine: IStorageEngine, plan: SyncPlan) -> int:
-    """Применить план к хранилищу. Возвращает число выполненных действий."""
-    applied = 0
-    for action in plan.actions:
-        errors = await engine.upsert(action.entity)
-        if errors:
-            raise SyncError(f"cannot apply {action.kind.value} for {action.entity.id}: {errors[0]}")
-        applied += 1
-    return applied
+    """Применить план к хранилищу. Возвращает число выполненных действий.
+
+    Объекты пишутся одной пачкой (`bulk_upsert`): ссылки проверяются по
+    всему набору, поэтому первый импорт связанных заметок не падает на
+    `DanglingReference` независимо от порядка действий в плане (ROADMAP
+    §5.1). Семантика порта для этого уже есть — контракт не меняется.
+    """
+    if not plan.actions:
+        return 0
+
+    errors = await engine.bulk_upsert(tuple(action.entity for action in plan.actions))
+    if errors:
+        kinds = {str(action.entity.id): action.kind.value for action in plan.actions}
+        first = errors[0]
+        kind = kinds.get(str(first.entity_id), "batch") if first.entity_id else "batch"
+        raise SyncError(f"cannot apply {kind} for {first.entity_id}: {first}")
+    return len(plan.actions)
 
 
 def _same_source_facts(previous: Entity, scanned: Entity) -> bool:

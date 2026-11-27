@@ -331,7 +331,8 @@ async def test_upsert_accepts_reference_to_existing_object(backend: Backend) -> 
     assert errors == []
 
 
-async def test_bulk_upsert_reports_errors_and_keeps_valid_objects(backend: Backend) -> None:
+async def test_bulk_upsert_is_atomic(backend: Backend) -> None:
+    """Пачка либо пишется целиком, либо не пишется вовсе (ADR-0022)."""
     engine = backend(SCHEMA)
     errors = await engine.bulk_upsert(
         (
@@ -340,8 +341,8 @@ async def test_bulk_upsert_reports_errors_and_keeps_valid_objects(backend: Backe
         )
     )
     assert codes(errors) == {ErrorCode.UNKNOWN_AXIS.value}
-    assert await engine.count() == 1
-    assert (await engine.get(EntityId("ok-1"))) is not None
+    assert await engine.count() == 0, "частичная запись пачки недопустима"
+    assert (await engine.get(EntityId("ok-1"))) is None
 
 
 # ------------------------------------------------------- выдача и пагинация

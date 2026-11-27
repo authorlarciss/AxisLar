@@ -167,3 +167,20 @@ async def test_non_reference_facets_are_not_indexed() -> None:
 
 def _now() -> datetime:
     return datetime(2026, 11, 27, tzinfo=UTC)
+
+
+async def test_bulk_is_atomic_when_one_entity_is_invalid() -> None:
+    """Пачка либо пишется целиком, либо не пишется вовсе (порт, bulk_upsert)."""
+    engine = make_engine()
+    assert isinstance(engine, IReferenceIndex)
+
+    errors = await engine.bulk_upsert(
+        [
+            note("a", links=("b",)),
+            note("b", links=("ghost",)),
+        ]
+    )
+
+    assert errors, "ссылка на отсутствующую цель должна отвергнуть пачку"
+    assert await engine.references_to(EntityId("b")) == ()
+    assert await engine.list_entities() == (), "ни один объект пачки не записан"

@@ -22,6 +22,7 @@ from nu.psi.contracts.alpha import (
     Entity,
     EntityId,
     Origin,
+    ReferenceValue,
     StorageSchema,
 )
 
@@ -241,3 +242,28 @@ def test_entity_requires_timezone_aware_deleted_at() -> None:
 
 def test_action_kind_is_stable() -> None:
     assert ActionKind.TOMBSTONE.value == "tombstone"
+
+
+async def test_apply_plan_writes_linked_notes_in_one_batch() -> None:
+    """Первый импорт связанных заметок: ссылка вперёд по плану не ломает пачку."""
+    engine = MemoryStorage(
+        schema=StorageSchema(
+            axes=(AxisDefinition(name="links", kind=AxisKind.REFERENCE, multi=True, target="note"),)
+        )
+    )
+    scanned = [
+        Entity(
+            id=EntityId("note-a"),
+            kind="note",
+            facets={"links": (ReferenceValue(target=EntityId("note-b")),)},
+            origin=Origin(source_id=SOURCE, key="a.md", content_hash="h-a", hash_algo="partial"),
+        ),
+        Entity(
+            id=EntityId("note-b"),
+            kind="note",
+            origin=Origin(source_id=SOURCE, key="b.md", content_hash="h-b", hash_algo="partial"),
+        ),
+    ]
+    plan = plan_sync(scanned, [], policy(), now=NOW)
+    assert await apply_plan(engine, plan) == 2
+    assert await engine.count() == 2
