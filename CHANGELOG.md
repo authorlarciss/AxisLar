@@ -10,6 +10,12 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Added
+
+- CI: job `publish` для PyPI по тегу через Trusted Publishing. Выключен
+  до настройки publisher'а на PyPI, включается переменной репозитория
+  `PYPI_OIDC=true`; до этого релиз публикуется вручную токеном.
+
 ## [0.11.0] - 2026-11-27
 
 ### Added

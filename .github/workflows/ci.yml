@@ -103,3 +103,33 @@ jobs:
             sleep 5
           done
           gh release view "$tag" --json assets -q '.assets[].name' || true
+
+  # Публикация ядра в PyPI по тегу через OIDC Trusted Publishing.
+  #
+  # По умолчанию job выключен: PyPI выдаёт токен только проектам, у которых
+  # настроен publisher. Включение — переменная репозитория PYPI_OIDC=true
+  # после того, как на PyPI в настройках axislar-core добавлен publisher
+  # (владелец: authorlarciss, репозиторий AxisLar, workflow ci.yml,
+  # environment release). До этого ядро публикуется вручную токеном.
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PYPI_OIDC == 'true'
+    needs: dist
+    permissions:
+      id-token: write
+      contents: read
+    environment: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+
+      - name: Publish to PyPI
+        run: uv publish --trusted-publishing always --check-url https://pypi.org/simple/ dist/*
