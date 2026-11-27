@@ -42,8 +42,8 @@ class NoArtifactsStore(IStorageEngine):
     async def add_scalar(self, scalar: ScalarDefinition) -> list[DomainError]:
         return await self._inner.add_scalar(scalar)
 
-    async def upsert(self, entity: Entity) -> list[DomainError]:
-        return await self._inner.upsert(entity)
+    async def upsert(self, entity: Entity, *, expected_rev: int | None = None) -> list[DomainError]:
+        return await self._inner.upsert(entity, expected_rev=expected_rev)
 
     async def bulk_upsert(self, entities: Sequence[Entity]) -> list[DomainError]:
         return await self._inner.bulk_upsert(entities)

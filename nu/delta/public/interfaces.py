@@ -48,8 +48,16 @@ class IStorageEngine(ABC):
         """Добавить текстовое поле в схему."""
 
     @abstractmethod
-    async def upsert(self, entity: Entity) -> list[DomainError]:
-        """Вставить или заменить объект по `id`."""
+    async def upsert(self, entity: Entity, *, expected_rev: int | None = None) -> list[DomainError]:
+        """Вставить или заменить объект по `id`.
+
+        `expected_rev` — оптимистичная блокировка (ADR-0024):
+        `None` — без проверки; `0` — «должен быть создан» (объекта ещё нет);
+        `N > 0` — «изменяю ревизию N». Несовпадение — ошибка `CONFLICT`,
+        и в хранилище не пишется ничего. Ревизию ставит бэкенд: 1 при
+        создании, `stored + 1` при обновлении; присланное клиентом значение
+        `rev` игнорируется.
+        """
 
     @abstractmethod
     async def bulk_upsert(self, entities: Sequence[Entity]) -> list[DomainError]:

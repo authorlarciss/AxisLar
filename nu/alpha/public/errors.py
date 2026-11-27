@@ -28,6 +28,7 @@ class ErrorCode(StrEnum):
     DANGLING_ARTIFACT = "dangling_artifact"
     ARTIFACT_MISMATCH = "artifact_mismatch"
     ARTIFACT_IN_USE = "artifact_in_use"
+    CONFLICT = "conflict"
 
 
 @dataclass(frozen=True, slots=True)

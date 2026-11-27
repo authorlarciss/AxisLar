@@ -88,16 +88,21 @@ class MemoryStorage(IStorageEngine, IReferenceIndex):
 
     # --------------------------------------------------------------- запись
 
-    async def upsert(self, entity: Entity) -> list[DomainError]:
+    async def upsert(self, entity: Entity, *, expected_rev: int | None = None) -> list[DomainError]:
+        stored = self._entities.get(entity.id)
+        conflict = _conflict(stored, expected_rev, entity.id)
+        if conflict is not None:
+            return [conflict]
+        stamped = entity.model_copy(update={"rev": (stored.rev + 1) if stored else 1})
         errors = validate_entity(
             self._schema,
-            entity,
-            known_ids={*self._entities, entity.id},
+            stamped,
+            known_ids={*self._entities, stamped.id},
             known_artifacts={*self._artifacts},
             capabilities=self.capabilities(),
         )
         if not errors:
-            self._index(previous=self._entities.get(entity.id), current=entity)
+            self._index(previous=stored, current=stamped)
         return errors
 
     async def bulk_upsert(self, entities: Sequence[Entity]) -> list[DomainError]:
@@ -124,7 +129,9 @@ class MemoryStorage(IStorageEngine, IReferenceIndex):
         if errors:
             return errors
         for entity in entities:
-            self._index(previous=self._entities.get(entity.id), current=entity)
+            stored = self._entities.get(entity.id)
+            stamped = entity.model_copy(update={"rev": (stored.rev + 1) if stored else 1})
+            self._index(previous=stored, current=stamped)
         return []
 
     # ------------------------------------------------------ обратные ссылки
@@ -278,6 +285,23 @@ class MemoryStorage(IStorageEngine, IReferenceIndex):
 
     def capabilities(self) -> frozenset[Capability]:
         return MEMORY_CAPABILITIES
+
+
+def _conflict(
+    stored: Entity | None, expected_rev: int | None, entity_id: EntityId
+) -> DomainError | None:
+    """Сверить ожидаемую ревизию (ADR-0024): `0` — создание, `N` — правка."""
+    if expected_rev is None:
+        return None
+    current = stored.rev if stored is not None else 0
+    if current == expected_rev:
+        return None
+    detail = (
+        f"revision mismatch: expected {expected_rev}, current {current}"
+        if stored is not None
+        else f"revision mismatch: expected {expected_rev}, object does not exist"
+    )
+    return DomainError(code=ErrorCode.CONFLICT, detail=detail, entity_id=entity_id)
 
 
 def _visible(entity: Entity | None) -> bool:

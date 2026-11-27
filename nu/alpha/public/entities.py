@@ -97,6 +97,10 @@ class Entity(BaseModel):
     artifacts: dict[str, ArtifactRef] = {}
     origin: Origin | None = None
     deleted_at: datetime | None = None
+    #: Ревизия объекта (ADR-0024). Ставит бэкенд при записи: 1 при
+    #: создании, дальше +1. Клиент присылает ожидаемую ревизию, чтобы две
+    #: вкладки не перетирали друг друга молча.
+    rev: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")
     def _check_facets(self) -> Self:

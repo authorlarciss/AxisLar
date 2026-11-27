@@ -107,6 +107,9 @@ async def run_storage_contract(factory: _BACKEND, schema: StorageSchema | None =
     engine = factory(schema)
     await _check_schema(engine, schema)
     await _check_write(engine)
+    # Ревизии проверяем на отдельном инстансе: их объекты не должны
+    # попадать в выборки остальных проверок.
+    await _check_revisions(factory(schema))
     await _check_missing_semantics(engine)
     await _check_facets(engine)
     await _check_sparsity(engine)
@@ -133,6 +136,31 @@ async def _check_write(engine: IStorageEngine) -> None:
     assert await engine.fetch_many((EntityId("a-1"), EntityId("nope"))) == (fetched,), (
         "fetch_many must skip missing ids and keep order"
     )
+
+
+async def _check_revisions(engine: IStorageEngine) -> None:
+    """Ревизии и оптимистичная блокировка (ADR-0024)."""
+    entity = _entity("rev-1")
+    assert await engine.upsert(entity, expected_rev=0) == [], "create with expected_rev=0"
+    stored = await engine.get(EntityId("rev-1"))
+    assert stored is not None and stored.rev == 1, "new object must start at rev 1"
+
+    assert await engine.upsert(entity, expected_rev=1) == [], "update with matching rev"
+    stored = await engine.get(EntityId("rev-1"))
+    assert stored is not None and stored.rev == 2, "rev must grow on update"
+
+    errors = await engine.upsert(entity, expected_rev=1)
+    assert [error.code for error in errors] == [ErrorCode.CONFLICT], (
+        "stale expected_rev must be reported as CONFLICT"
+    )
+    stored = await engine.get(EntityId("rev-1"))
+    assert stored is not None and stored.rev == 2, "CONFLICT must not change the object"
+
+    errors = await engine.upsert(_entity("rev-2"), expected_rev=3)
+    assert [error.code for error in errors] == [ErrorCode.CONFLICT], (
+        "expected_rev for missing object must be CONFLICT"
+    )
+    assert await engine.get(EntityId("rev-2")) is None, "CONFLICT must not create anything"
 
 
 async def _check_missing_semantics(engine: IStorageEngine) -> None:

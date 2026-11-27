@@ -107,7 +107,10 @@ async def test_empty_store_returns_nothing(backend: Backend) -> None:
 async def test_seeded_objects_are_stored(backend: Backend) -> None:
     engine = await seeded(backend)
     assert await engine.count() == 3
-    assert (await engine.get(EntityId("c-3"))) == SEED[2]
+    stored = await engine.get(EntityId("c-3"))
+    assert stored is not None
+    assert stored.model_copy(update={"rev": 0}) == SEED[2], "кроме rev объект не меняется"
+    assert stored.rev == 1
 
 
 async def test_fetch_many_skips_missing(backend: Backend) -> None:
@@ -329,6 +332,28 @@ async def test_upsert_accepts_reference_to_existing_object(backend: Backend) -> 
     engine = await seeded(backend)
     errors = await engine.upsert(entity("x", author=[{"kind": "reference", "target": "b-2"}]))
     assert errors == []
+
+
+async def test_revisions_are_optimistic(backend: Backend) -> None:
+    """Ревизии: создание с 0, правка с совпадающей, конфликт на устаревшей."""
+    engine = backend(SCHEMA)
+    item = entity("rev-1")
+    assert await engine.upsert(item, expected_rev=0) == []
+    stored = await engine.get(EntityId("rev-1"))
+    assert stored is not None and stored.rev == 1
+
+    assert await engine.upsert(item, expected_rev=1) == []
+    stored = await engine.get(EntityId("rev-1"))
+    assert stored is not None and stored.rev == 2
+
+    errors = await engine.upsert(item, expected_rev=1)
+    assert {item.code for item in errors} == {ErrorCode.CONFLICT}
+    after_conflict = await engine.get(EntityId("rev-1"))
+    assert after_conflict is not None and after_conflict.rev == 2
+
+    errors = await engine.upsert(entity("rev-2"), expected_rev=5)
+    assert {item.code for item in errors} == {ErrorCode.CONFLICT}
+    assert await engine.get(EntityId("rev-2")) is None
 
 
 async def test_bulk_upsert_is_atomic(backend: Backend) -> None:
