@@ -10,6 +10,8 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-27
+
 ### Changed
 
 - **`apply_plan` пишет пачкой** (`bulk_upsert`) вместо последовательных
