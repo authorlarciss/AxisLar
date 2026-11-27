@@ -41,16 +41,20 @@ from nu.psi.contracts.alpha import StorageSchema as StorageSchema
 from nu.psi.contracts.alpha import content_hash_of as content_hash_of
 from nu.psi.contracts.alpha import make_artifact as make_artifact
 from nu.psi.contracts.beta import ActionKind as ActionKind
+from nu.psi.contracts.beta import DanglingLinks as DanglingLinks
 from nu.psi.contracts.beta import FeatureResolution as FeatureResolution
 from nu.psi.contracts.beta import SyncConflict as SyncConflict
 from nu.psi.contracts.beta import SyncPlan as SyncPlan
 from nu.psi.contracts.beta import SyncPolicy as SyncPolicy
 from nu.psi.contracts.beta import apply_plan as apply_plan
+from nu.psi.contracts.beta import cascade_order as cascade_order
+from nu.psi.contracts.beta import collect_dangling as collect_dangling
 from nu.psi.contracts.beta import inherit_derived as inherit_derived
 from nu.psi.contracts.beta import merge_entity as merge_entity
 from nu.psi.contracts.beta import plan_sync as plan_sync
 from nu.psi.contracts.beta import resolve_feature as resolve_feature
 from nu.psi.contracts.beta import resolve_features as resolve_features
+from nu.psi.contracts.beta import tombstone_entity as tombstone_entity
 from nu.psi.contracts.beta import validate_artifact as validate_artifact
 from nu.psi.contracts.beta import validate_axis as validate_axis
 from nu.psi.contracts.beta import validate_entity as validate_entity
@@ -81,6 +85,7 @@ __all__ = [
     "ClientProfile",
     "CategoricalValue",
     "Core",
+    "DanglingLinks",
     "DomainError",
     "Entity",
     "EntityId",
@@ -110,6 +115,8 @@ __all__ = [
     "SyncPolicy",
     "__version__",
     "apply_plan",
+    "cascade_order",
+    "collect_dangling",
     "build_core",
     "entity_id_for",
     "run_reference_index_contract",
@@ -121,6 +128,7 @@ __all__ = [
     "make_artifact",
     "merge_entity",
     "plan_sync",
+    "tombstone_entity",
     "resolve_feature",
     "resolve_features",
     "validate_artifact",

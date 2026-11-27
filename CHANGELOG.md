@@ -10,6 +10,15 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-11-27
+
+### Fixed
+
+- `tombstone_entity`, `cascade_order`, `collect_dangling` и `DanglingLinks` не
+  попали в публичный фасад `nu.contracts` в 0.14.0 — для продукта и плагинов
+  их не существовало. Добавлены, плюс тест на полноту фасада
+  (`tau/psi/test_facade.py`).
+
 ## [0.14.0] - 2026-11-27
 
 ### Added
