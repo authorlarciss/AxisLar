@@ -165,7 +165,17 @@ def _reference_detail(links: Sequence[ReferenceLink]) -> str:
         by_axis[link.axis] = by_axis.get(link.axis, 0) + 1
     sources = len({link.entity_id for link in links})
     layout = ", ".join(f"{axis}={count}" for axis, count in sorted(by_axis.items()))
-    return f"на объект ссылаются {sources} объекта: {layout}"
+    word = _plural(sources, "объект", "объекта", "объектов")
+    return f"на объект ссылаются {sources} {word}: {layout}"
+
+
+def _plural(count: int, one: str, few: str, many: str) -> str:
+    """Русское склонение по числу: 1 объект, 2 объекта, 5 объектов."""
+    if count % 10 == 1 and count % 100 != 11:
+        return one
+    if 2 <= count % 10 <= 4 and not 12 <= count % 100 <= 14:
+        return few
+    return many
 
 
 __all__ = ["DanglingLinks", "cascade_order", "collect_dangling", "tombstone_entity"]

@@ -140,3 +140,21 @@ async def test_backend_without_reference_index_refuses() -> None:
     errors = await tombstone_entity(wrapped, EntityId("g-7"))
     assert [error.code for error in errors] == [ErrorCode.UNSUPPORTED_CAPABILITY]
     assert await storage.get(EntityId("g-7")) is not None
+
+
+async def test_reference_in_use_message_is_declined() -> None:
+    """Сообщение читает человек: «1 объект», «2 объекта», «5 объектов»."""
+    one = await engine(entity("b-2"), entity("a-1", author="b-2"))
+    [error] = await tombstone_entity(one, EntityId("b-2"))
+    assert "ссылаются 1 объект:" in error.detail
+
+    many = await engine(
+        entity("b-2"),
+        entity("a-1", author="b-2"),
+        entity("c-3", author="b-2"),
+        entity("d-4", author="b-2"),
+        entity("e-5", author="b-2"),
+        entity("f-6", author="b-2"),
+    )
+    [error] = await tombstone_entity(many, EntityId("b-2"))
+    assert "ссылаются 5 объектов:" in error.detail

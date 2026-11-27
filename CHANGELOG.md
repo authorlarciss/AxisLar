@@ -10,6 +10,13 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-11-27
+
+### Fixed
+
+- Текст `reference_in_use` склоняется по числу («ссылаются 1 объект», а не
+  «1 объекта»): сообщение видно человеку в CLI и UI.
+
 ## [0.14.1] - 2026-11-27
 
 ### Fixed
