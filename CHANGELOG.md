@@ -12,6 +12,12 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
+- Контрактный набор `run_reference_index_contract(factory)` для порта
+  `IReferenceIndex` (ADR-0021): входящие ссылки, фильтр по осям, «пустой
+  список = никаких осей», перезапись объекта, пачка со ссылками внутри,
+  tombstone и `include_deleted`, детерминированный порядок, отсутствие
+  индексации не-reference фасетов. Набор ловит «объявил возможность, а
+  порт не реализовал». Экспорт: `nu.contracts`.
 - CI: job `publish` для PyPI по тегу через Trusted Publishing. Выключен
   до настройки publisher'а на PyPI, включается переменной репозитория
   `PYPI_OIDC=true`; до этого релиз публикуется вручную токеном.

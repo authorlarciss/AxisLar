@@ -38,13 +38,19 @@ from nu.psi.contracts.alpha import (
     Operator,
     Query,
     QueryResult,
+    ReferenceLink,
     ReferenceValue,
     ScalarDefinition,
     StorageSchema,
     make_artifact,
 )
 from nu.psi.contracts.beta import validate_entity
-from nu.psi.contracts.delta import IEntitySource, IStorageEngine, StorageQueryError
+from nu.psi.contracts.delta import (
+    IEntitySource,
+    IReferenceIndex,
+    IStorageEngine,
+    StorageQueryError,
+)
 
 #: Схема, на которой проверяется бэкенд.
 CONTRACT_SCHEMA = StorageSchema(
@@ -419,3 +425,163 @@ async def run_source_sync_contract(
         assert origin.content_hash and origin.hash_algo, (
             f"sync source must provide content_hash/hash_algo: {entity.id!r}"
         )
+
+
+#: Схема для контракта обратных ссылок: две reference-оси и одна обычная.
+REFERENCE_CONTRACT_SCHEMA = StorageSchema(
+    axes=(
+        AxisDefinition(name="links", kind=AxisKind.REFERENCE, multi=True, target="note"),
+        AxisDefinition(name="mentions", kind=AxisKind.REFERENCE, multi=True, target="note"),
+        AxisDefinition(name="theme", kind=AxisKind.CATEGORICAL, multi=True),
+    )
+)
+
+
+def _note(entity_id: str, **facets: object) -> Entity:
+    """Объект вида «note» без скаляров: набору важны только ссылки."""
+    return Entity.model_validate({"id": entity_id, "kind": "note", "facets": facets})
+
+
+async def run_reference_index_contract(
+    factory: _BACKEND, schema: StorageSchema | None = None
+) -> None:
+    """Прогнать контракт обратных ссылок (ADR-0021) против фабрики бэкенда.
+
+    Набор имеет смысл только для бэкендов, объявивших
+    `Capability.TRAVERSE_REFERENCES`; остальные его не проходят и не должны
+    вызывать. Бросает `AssertionError` с описанием нарушения.
+    """
+    schema = schema or REFERENCE_CONTRACT_SCHEMA
+    engine = factory(schema)
+    assert isinstance(engine, IReferenceIndex), "backend must implement IReferenceIndex"
+    assert Capability.TRAVERSE_REFERENCES in engine.capabilities(), (
+        "backend must declare Capability.TRAVERSE_REFERENCES"
+    )
+    await _check_reference_basics(engine)
+    await _check_reference_axes_filter(engine)
+    await _check_reference_replace(engine)
+    await _check_reference_batch(engine)
+    await _check_reference_tombstone(engine)
+    await _check_reference_order(engine)
+
+
+async def _check_reference_basics(engine: IStorageEngine) -> None:
+    assert isinstance(engine, IReferenceIndex), "reference checks need the port"
+    assert await engine.references_to(EntityId("nobody")) == (), (
+        "empty store must have no incoming links"
+    )
+    await engine.bulk_upsert(
+        [_note("src", links=({"kind": "reference", "target": "dst"},)), _note("dst")]
+    )
+    assert await engine.references_to(EntityId("dst")) == (
+        ReferenceLink(axis="links", entity_id=EntityId("src")),
+    ), "incoming link must carry axis and source"
+
+    await engine.upsert(_note("plain", theme=({"kind": "categorical", "value": "x"},)))
+    assert await engine.references_to(EntityId("plain")) == (), (
+        "non-reference facets must not be indexed"
+    )
+
+
+async def _check_reference_axes_filter(engine: IStorageEngine) -> None:
+    assert isinstance(engine, IReferenceIndex), "reference checks need the port"
+    target = await engine.references_to(EntityId("dst"))
+    assert [link.axis for link in target] == ["links"], "only the linking axis is reported"
+
+    await engine.upsert(
+        _note(
+            "mentions-src",
+            mentions=({"kind": "reference", "target": "dst"},),
+        )
+    )
+    both = await engine.references_to(EntityId("dst"))
+    assert [link.axis for link in both] == ["links", "mentions"], "all axes by default"
+    only = await engine.references_to(EntityId("dst"), ["mentions"])
+    assert [link.axis for link in only] == ["mentions"], "axes filter must narrow the result"
+    assert await engine.references_to(EntityId("dst"), []) == (), (
+        "empty axes sequence means 'no axes', not 'all axes'"
+    )
+    assert await engine.references_to(EntityId("dst"), ["unknown-axis"]) == (), (
+        "unknown axis yields nothing instead of an error"
+    )
+
+
+async def _check_reference_replace(engine: IStorageEngine) -> None:
+    assert isinstance(engine, IReferenceIndex), "reference checks need the port"
+    await engine.bulk_upsert([_note("mover"), _note("target-a"), _note("target-b")])
+    await engine.upsert(_note("mover", links=({"kind": "reference", "target": "target-a"},)))
+    assert (await engine.references_to(EntityId("target-a")))[0].entity_id == EntityId("mover")
+
+    await engine.upsert(_note("mover", links=({"kind": "reference", "target": "target-b"},)))
+    assert await engine.references_to(EntityId("target-a")) == (), (
+        "re-upsert must drop the previous link"
+    )
+    assert (await engine.references_to(EntityId("target-b")))[0].entity_id == EntityId("mover")
+
+    await engine.upsert(_note("mover"))
+    assert await engine.references_to(EntityId("target-b")) == (), (
+        "removing the facet must remove the link"
+    )
+
+
+async def _check_reference_batch(engine: IStorageEngine) -> None:
+    assert isinstance(engine, IReferenceIndex), "reference checks need the port"
+    errors = await engine.bulk_upsert(
+        [
+            _note("batch-a", links=({"kind": "reference", "target": "batch-b"},)),
+            _note("batch-b", links=({"kind": "reference", "target": "batch-c"},)),
+            _note("batch-c"),
+        ]
+    )
+    assert errors == [], "batch references must validate across the whole batch"
+    sources = await engine.references_to(EntityId("batch-c"))
+    assert [str(link.entity_id) for link in sources] == ["batch-b"], (
+        "batch must be visible in the reverse index"
+    )
+
+
+async def _check_reference_tombstone(engine: IStorageEngine) -> None:
+    assert isinstance(engine, IReferenceIndex), "reference checks need the port"
+    deleted = datetime(2026, 1, 1, tzinfo=UTC)
+    await engine.bulk_upsert(
+        [
+            _note("ghost", links=({"kind": "reference", "target": "alive"},)),
+            _note("alive"),
+        ]
+    )
+    await engine.upsert(
+        _note("ghost", links=({"kind": "reference", "target": "alive"},)).model_copy(
+            update={"deleted_at": deleted}
+        )
+    )
+    assert await engine.references_to(EntityId("alive")) == (), (
+        "links from tombstone sources are hidden by default"
+    )
+    revived = await engine.references_to(EntityId("alive"), include_deleted=True)
+    assert [str(link.entity_id) for link in revived] == ["ghost"], (
+        "include_deleted=True must return tombstone sources"
+    )
+
+
+async def _check_reference_order(engine: IStorageEngine) -> None:
+    assert isinstance(engine, IReferenceIndex), "reference checks need the port"
+    await engine.bulk_upsert(
+        [
+            _note(
+                "z",
+                links=(
+                    {"kind": "reference", "target": "hub"},
+                    {"kind": "reference", "target": "hub"},
+                ),
+            ),
+            _note("a", links=({"kind": "reference", "target": "hub"},)),
+            _note("m", mentions=({"kind": "reference", "target": "hub"},)),
+            _note("hub"),
+        ]
+    )
+    links = await engine.references_to(EntityId("hub"))
+    assert [(link.axis, str(link.entity_id)) for link in links] == [
+        ("links", "a"),
+        ("links", "z"),
+        ("mentions", "m"),
+    ], f"order must be deterministic (axis, then id), got {links}"

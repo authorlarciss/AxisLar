@@ -61,6 +61,9 @@ from nu.psi.contracts.delta import IReferenceIndex as IReferenceIndex
 from nu.psi.contracts.delta import IStorageEngine as IStorageEngine
 from nu.psi.contracts.delta import StorageQueryError as StorageQueryError
 from nu.psi.contracts.iota import entity_id_for as entity_id_for
+from nu.psi.contracts.iota import (
+    run_reference_index_contract as run_reference_index_contract,
+)
 from nu.psi.contracts.iota import run_source_contract as run_source_contract
 from nu.psi.contracts.iota import run_source_sync_contract as run_source_sync_contract
 from nu.psi.contracts.iota import run_storage_contract as run_storage_contract
@@ -109,6 +112,7 @@ __all__ = [
     "apply_plan",
     "build_core",
     "entity_id_for",
+    "run_reference_index_contract",
     "run_source_contract",
     "run_source_sync_contract",
     "run_storage_contract",
