@@ -107,9 +107,6 @@ async def run_storage_contract(factory: _BACKEND, schema: StorageSchema | None =
     engine = factory(schema)
     await _check_schema(engine, schema)
     await _check_write(engine)
-    # Ревизии проверяем на отдельном инстансе: их объекты не должны
-    # попадать в выборки остальных проверок.
-    await _check_revisions(factory(schema))
     await _check_missing_semantics(engine)
     await _check_facets(engine)
     await _check_sparsity(engine)
@@ -117,6 +114,9 @@ async def run_storage_contract(factory: _BACKEND, schema: StorageSchema | None =
     await _check_rejection(engine)
     await _check_tombstones(engine)
     await _check_artifacts(engine)
+    # Ревизии — последними: их объекты остаются в хранилище (удалять
+    # нечего), и в файловом бэкенде они видны остальным проверкам.
+    await _check_revisions(factory(schema))
 
 
 async def _check_schema(engine: IStorageEngine, schema: StorageSchema) -> None:
