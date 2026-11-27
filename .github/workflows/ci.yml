@@ -132,4 +132,14 @@ jobs:
           version: "latest"
 
       - name: Publish to PyPI
-        run: uv publish --trusted-publishing always --check-url https://pypi.org/simple/ dist/*
+        run: |
+          set -euo pipefail
+          for file in dist/*; do
+            project=$(basename "$file" | cut -d- -f1 | tr '_' '-')
+            version=$(basename "$file" | cut -d- -f2)
+            if curl -fsS -o /dev/null "https://pypi.org/pypi/$project/$version/json"; then
+              echo "skip: $project $version уже в индексе"
+              continue
+            fi
+            uv publish --trusted-publishing always "$file"
+          done
