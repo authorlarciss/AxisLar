@@ -29,6 +29,8 @@ class ErrorCode(StrEnum):
     ARTIFACT_MISMATCH = "artifact_mismatch"
     ARTIFACT_IN_USE = "artifact_in_use"
     CONFLICT = "conflict"
+    REFERENCE_IN_USE = "reference_in_use"
+    UNSUPPORTED_CAPABILITY = "unsupported_capability"
 
 
 @dataclass(frozen=True, slots=True)

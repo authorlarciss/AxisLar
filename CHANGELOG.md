@@ -10,6 +10,26 @@ project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-27
+
+### Added
+
+- **Политика удаления** (ADR-0025): `tombstone_entity(engine, id)` —
+  пользовательское удаление, которое отказывает при живых входящих ссылках
+  (`REFERENCE_IN_USE`) и не пишет ничего; пишет через `upsert` с
+  `expected_rev`, поэтому гонка с правкой даёт `CONFLICT`.
+- `cascade_order(index, id)` — порядок удаления цели вместе со ссылающимися
+  (сначала ссылающиеся); `collect_dangling(engine, ids)` — отчёт «какие
+  ссылки стали висячими», для синхронизации.
+- `ErrorCode.REFERENCE_IN_USE`, `ErrorCode.UNSUPPORTED_CAPABILITY`.
+- `lambda/DOMAIN.md` §3.5 — инварианты удаления (D1–D6).
+
+### Changed
+
+- Бэкенд без `TRAVERSE_REFERENCES` удалять отказывается: политику нельзя
+  проверить — нельзя и утверждать, что проверили.
+- Контракт не менялся (6): порты те же, `upsert` ведёт себя как раньше.
+
 ## [0.13.1] - 2026-11-27
 
 ### Fixed

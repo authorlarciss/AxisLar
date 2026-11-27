@@ -1,5 +1,9 @@
 """Публичный API модуля beta: проверки модели и синхронизация источника."""
 
+from nu.beta.public.deletion import DanglingLinks as DanglingLinks
+from nu.beta.public.deletion import cascade_order as cascade_order
+from nu.beta.public.deletion import collect_dangling as collect_dangling
+from nu.beta.public.deletion import tombstone_entity as tombstone_entity
 from nu.beta.public.features import FeatureResolution as FeatureResolution
 from nu.beta.public.features import fits as fits
 from nu.beta.public.features import resolve_feature as resolve_feature
@@ -22,6 +26,7 @@ from nu.beta.public.validation import validate_scalar as validate_scalar
 
 __all__ = [
     "ActionKind",
+    "DanglingLinks",
     "FeatureResolution",
     "SyncAction",
     "SyncConflict",
@@ -29,12 +34,15 @@ __all__ = [
     "SyncPlan",
     "SyncPolicy",
     "apply_plan",
+    "cascade_order",
+    "collect_dangling",
     "fits",
     "inherit_derived",
     "merge_entity",
     "plan_sync",
     "resolve_feature",
     "resolve_features",
+    "tombstone_entity",
     "validate_artifact",
     "validate_axis",
     "validate_entity",
