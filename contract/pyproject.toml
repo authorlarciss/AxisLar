@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "axislar-contract"
+version = "6.0.0"
+description = "Контракт AxisLar: версия совместимости для ядра и плагинов"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.13,<3.15"
+authors = [
+    { name = "authorlarciss", email = "author.larciss@gmail.com" }
+]
+
+[project.urls]
+Homepage = "https://github.com/authorlarciss/AxisLar"
+Source = "https://github.com/authorlarciss/AxisLar/tree/HEAD/contract"
+
+[tool.setuptools.package-data]
+axislar_contract = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["axislar_contract*"]

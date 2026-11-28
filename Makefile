@@ -109,6 +109,9 @@ dist: contracts-check
 	rm -rf $(DIST_DIR) dist
 	$(PY) -m eta.rename_package --to $(DIST_PACKAGE) --from-dir $(DIST_DIR)
 	cd $(DIST_DIR) && uv build --out-dir ../dist
+	# Контракт — отдельный дистрибутив (ADR-0022): имя файла сортируется
+	# раньше ядра, поэтому публикация идёт «контракт → ядро» без спецкода.
+	cd contract && uv build --out-dir ../dist
 	@ls -1 dist
 
 run:

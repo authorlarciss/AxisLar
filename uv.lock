@@ -75,9 +75,15 @@ wheels = [
 ]
 
 [[package]]
-name = "axislar"
+name = "axislar-contract"
+version = "6.0.0"
+source = { editable = "contract" }
+
+[[package]]
+name = "axislar-core"
 source = { editable = "." }
 dependencies = [
+    { name = "axislar-contract" },
     { name = "pydantic" },
 ]
 
@@ -94,6 +100,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "axislar-contract", editable = "contract" },
     { name = "import-linter", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.6" },

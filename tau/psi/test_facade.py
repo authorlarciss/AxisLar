@@ -25,3 +25,11 @@ def test_error_codes_are_exported() -> None:
     """Коды ошибок — часть контракта: клиенты сравнивают значения."""
     assert contracts.ErrorCode.REFERENCE_IN_USE.value == "reference_in_use"
     assert contracts.ErrorCode.UNSUPPORTED_CAPABILITY.value == "unsupported_capability"
+
+
+def test_contract_version_comes_from_contract_package() -> None:
+    """ADR-0022: номер контракта живёт в `axislar-contract`, ядро его реэкспортирует."""
+    import axislar_contract
+
+    assert contracts.CONTRACT_VERSION == axislar_contract.CONTRACT_VERSION
+    assert axislar_contract.CONTRACT_VERSION == "6"

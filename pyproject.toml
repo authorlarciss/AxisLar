@@ -15,6 +15,7 @@ authors = [
 ]
 dependencies = [
     "pydantic>=2.14.4",
+    "axislar-contract>=6,<7",
 ]
 
 [project.urls]
@@ -39,6 +40,11 @@ version = { attr = "nu.mu.public.__version__" }
 [tool.setuptools.package-data]
 nu = ["py.typed"]
 
+# Разработка: контракт берётся из соседнего каталога, чтобы правки контракта
+# проверялись без публикации. В метаданные колеса попадает обычный диапазон.
+[tool.uv.sources]
+axislar-contract = { path = "contract", editable = true }
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["nu*"]
@@ -46,6 +52,9 @@ include = ["nu*"]
 # ---------- Mypy ----------
 [tool.mypy]
 python_version = "3.13"
+# Контракт в разработке — соседний проект (`contract/`); mypy не видит его
+# через editable-установку, поэтому путь указывается явно.
+mypy_path = "contract"
 strict = true
 warn_return_any = true
 warn_unused_ignores = true
